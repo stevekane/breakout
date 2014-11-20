@@ -1,7 +1,13 @@
 var canvas = document.createElement("canvas")
 var gl     = canvas.getContext("webgl")
 
-document.body.appendChild(canvas)
+var log   = console.log.bind(console)
+var print = function (x) { 
+  console.log(JSON.stringify(x, null, 2))
+}
+var defined = function (obj, key) {
+  return obj[key] !== undefined && obj[key] !== null
+}
 
 var MAX_ENTITY_COUNT = 10
 var MAX_SWAP_SIZE    = 30
@@ -10,12 +16,19 @@ function SortedBuffer (elementSize, count) {
   var swapBuffer = new Float32Array(MAX_SWAP_SIZE)
   var buffer     = new Float32Array(elementSize * count)
 
-  this.count     = 0
-  this.liveCount = 0
+  this.count       = 0
+  this.liveCount   = 0
+  this.elementSize = elementSize
 
   Object.defineProperty(this, "maxIndex", {
     get: function () {
-      return this.count * elementSize
+      return this.count * this.elementSize
+    } 
+  })
+
+  Object.defineProperty(this, "livingIndex", {
+    get: function () {
+      retur this.liveCount * this.elementSize  
     } 
   })
 
@@ -52,10 +65,11 @@ function SortedBuffer (elementSize, count) {
     }
   }
 
-  this.swap = function (length, index1, index2) {
-    var i = -1
+  this.swap = function (index1, index2) {
+    var len = this.elementSize
+    var i   = -1
 
-    while (++i < length) {
+    while (++i < len) {
       swapBuffer[i]      = buffer[index1 + i] 
       buffer[index1 + i] = buffer[index2 + i]  
       buffer[index2 + i] = swapBuffer[i]
@@ -68,7 +82,6 @@ function SortedBuffer (elementSize, count) {
  */
 function EntityStore () {
   this.entities = []
-  this.tables   = ["physics"]
   this.physics  = new SortedBuffer(8, MAX_ENTITY_COUNT)
 
   this.addPhysics = function (id, physics) {
@@ -88,7 +101,25 @@ function EntityStore () {
   }
 
   this.activate = function (eid) {
-     
+    var entityIndex = this.entities[eid]
+    var len         = this.tables.length
+    var i           = -1
+
+    if (defined(entityIndex, "physics")) {
+      this.physics.swap(this.physics.livingIndex, entityIndex.physics)
+      this.physics.liveCount++
+    }
+  }
+
+  this.deactivate = function (eid) {
+    var entityIndex = this.entities[eid]
+    var len         = this.tables.length
+    var i           = -1
+
+    if (defined(entityIndex, "physics")) {
+      this.physics.swap(this.physics.livingIndex, entityIndex.physics)
+      this.physics.liveCount++
+    }
   }
 
   this.addEntity = function (ent) {
@@ -96,7 +127,7 @@ function EntityStore () {
 
     this.entities.push({})
 
-    if (ent.physics)  this.addPhysics(id, ent.physics)
+    if (defined(ent, "physics"))  this.addPhysics(id, ent.physics)
     if (ent.isActive) this.activate(id)
     return id
   }
@@ -165,3 +196,4 @@ es.activate(1)
 es.addEntity(p1)
 es.addEntity(p2)
 es.physics.getRange(myBuffer, 0, 16)
+document.body.appendChild(canvas)
