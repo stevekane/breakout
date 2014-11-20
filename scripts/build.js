@@ -1,0 +1,11 @@
+var browserify = require("browserify")
+var path       = require('path')
+var fs         = require('fs')
+var targetPath = path.join("..", "src", "simplepong.js")
+var bundlePath = path.join("public", "simplepong.js")
+
+browserify({debug: true})
+  .require(require.resolve(targetPath), { entry: true })
+  .bundle()
+  .on('error', function (err) { console.error(err); })
+  .pipe(fs.createWriteStream(bundlePath))

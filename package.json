@@ -1,0 +1,33 @@
+{
+  "name": "simplepong",
+  "version": "1.0.0",
+  "description": "This is a very simple pong game rendered with webgl",
+  "main": "server.js",
+  "scripts": {
+    "test": "node tests.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/stevekane/simplepong.git"
+  },
+  "keywords": [
+    "pong",
+    "html5",
+    "game",
+    "webgl",
+    "demo",
+    "tutorial"
+  ],
+  "author": "Steven Kane",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stevekane/simplepong/issues"
+  },
+  "homepage": "https://github.com/stevekane/simplepong",
+  "dependencies": {
+    "browserify": "^6.3.2"
+  },
+  "devDependencies": {
+    "tape": "^3.0.3"
+  }
+}
