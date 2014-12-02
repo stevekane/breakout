@@ -1,8 +1,9 @@
 var http     = require("http")
+var lr       = require("livereload")
 var fs       = require("fs")
 var path     = require("path")
 var PORT     = 4000
-var htmlPath = "./simplepong.html"
+var htmlPath = "./breakout.html"
 
 function writeError (res, err) {
   res.writeHead(404)
@@ -25,4 +26,7 @@ var server = http.createServer(function (req, res) {
   })
 })
 
+var lrServer = lr.createServer()
+
+lrServer.watch(__dirname + "/public")
 server.listen(PORT)
