@@ -1,3 +1,4 @@
+let datGui = require("dat-gui")
 let {clearContext} = require("./gl-utils")
 let {loadSound, loadImage} = require("./loaders")
 let AudioSystem = require("./audio")
@@ -7,8 +8,8 @@ let setInterval = window.setInterval
 
 let audioSystem = new AudioSystem
 let canvas      = document.createElement("canvas")
-let slider      = document.createElement("input")
 let button      = document.createElement("button")
+let gui         = new datGui.GUI()
 
 //perhaps wrap this?
 let gl = canvas.getContext("webgl")
@@ -23,7 +24,7 @@ let settings = {
       width: 400,
       height: 600
     },
-    bgColor: [0.3, 0.0, 0.0, 1.0]
+    bgColor: {r: 0.3, g: 0.0, b: 0.0, a: 1.0}
   }
 }
 
@@ -31,10 +32,6 @@ let cache = {
   sounds:  {},
   sprites: {}
 }
-
-//debugging/dev
-window.audioSystem = audioSystem
-window.settings    = settings
 
 function makeUpdate () {
   return function update () {
@@ -53,19 +50,16 @@ function makeRender (gl) {
   }
 }
 
-slider.type  = "range"
-slider.min   = 0
-slider.max   = 1
-slider.step  = 0.1
-slider.value = settings.audio.bgVolume
-document.body.appendChild(slider)
-document.body.appendChild(button)
+gui.add(settings.audio, "bgVolume", 0, 1)
+gui.add(settings.audio, "mainVolume", 0, 1)
+gui.add(settings.video.resolution, "width", 200, 400)
+gui.add(settings.video.resolution, "height", 400, 600)
+gui.add(settings.video.bgColor, "r", 0, 1)
+gui.add(settings.video.bgColor, "g", 0, 1)
+gui.add(settings.video.bgColor, "b", 0, 1)
+gui.add(settings.video.bgColor, "a", 0, 1)
 document.body.appendChild(canvas)
-
-slider.addEventListener("change", function (e) {
-  console.log(this.value)
-  settings.audio.bgVolume = this.value
-})
+document.body.appendChild(button)
 
 button.addEventListener("click", function (e) {
   audioSystem.play(cache.hadouken)
