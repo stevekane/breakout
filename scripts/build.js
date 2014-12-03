@@ -7,6 +7,7 @@ var bundlePath = path.join("public", "breakout.js")
 
 browserify({debug: true})
   .transform(to5)
+  .external("dat-gui")
   .require(require.resolve(targetPath), { entry: true })
   .bundle()
   .on('error', function (err) { console.error(err); })

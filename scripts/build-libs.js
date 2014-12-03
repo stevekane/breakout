@@ -1,0 +1,10 @@
+var browserify = require("browserify")
+var path       = require('path')
+var fs         = require('fs')
+var bundlePath = path.join("public", "libs.js")
+
+browserify({debug: true})
+  .require("dat-gui")
+  .bundle()
+  .on('error', function (err) { console.error(err); })
+  .pipe(fs.createWriteStream(bundlePath))
