@@ -1,33 +1,45 @@
 let datGui = require("dat-gui")
 let {clearContext} = require("./gl-utils")
-let {loadSound, loadImage} = require("./loaders")
+let {LoadStream, ImageAsset, SoundAsset} = require("./loaders")
 let AudioSystem = require("./audio")
 
 let raf         = window.requestAnimationFrame
 let setInterval = window.setInterval
 
-let audioSystem = new AudioSystem
+let audioSystem = new AudioSystem(["main", "bg"])
+let {main, bg}  = audioSystem.channels
 let canvas      = document.createElement("canvas")
-let button      = document.createElement("button")
 let gui         = new datGui.GUI()
 
 //perhaps wrap this?
 let gl = canvas.getContext("webgl")
 
+let assets = {
+  sounds: {
+    background: "public/sounds/bgm1.mp3",
+    hadouken:   "public/sounds/hadouken.mp3" 
+  }
+}
+
 let settings = {
   audio: {
-    bgVolume: 1.0,
-    mainVolume:    1.0
+    bgVolume:   0.0,
+    mainVolume: 1.0
   },
   video: {
     resolution: {
       width: 400,
       height: 600
     },
-    bgColor: {r: 0.3, g: 0.0, b: 0.0, a: 1.0}
+    bgColor: [100, 0, 0, 1.0]
   }
 }
 
+let testFns = {
+  playHadouken: () => main.play(cache.sounds.hadouken)
+}
+
+let loadStream = new LoadStream
 let cache = {
   sounds:  {},
   sprites: {}
@@ -35,8 +47,8 @@ let cache = {
 
 function makeUpdate () {
   return function update () {
-    audioSystem.bgGain.gain.value   = settings.audio.bgVolume
-    audioSystem.mainGain.gain.value = settings.audio.mainVolume
+    bg.volume   = settings.audio.bgVolume
+    main.volume = settings.audio.mainVolume
   }
 }
 
@@ -50,29 +62,43 @@ function makeRender (gl) {
   }
 }
 
-gui.add(settings.audio, "bgVolume", 0, 1)
-gui.add(settings.audio, "mainVolume", 0, 1)
-gui.add(settings.video.resolution, "width", 200, 400)
-gui.add(settings.video.resolution, "height", 400, 600)
-gui.add(settings.video.bgColor, "r", 0, 1)
-gui.add(settings.video.bgColor, "g", 0, 1)
-gui.add(settings.video.bgColor, "b", 0, 1)
-gui.add(settings.video.bgColor, "a", 0, 1)
+let audioTab  = gui.addFolder("Audio")
+let videoTab  = gui.addFolder("Video")
+let actionTab = gui.addFolder("Actions")
+
+audioTab.open()
+videoTab.open()
+actionTab.open()
+audioTab.add(settings.audio, "bgVolume", [0.0, 0.5, 1.0])
+audioTab.add(settings.audio, "mainVolume", [0.0, 0.5, 1.0])
+videoTab.add(settings.video.resolution, "width", 200, 400)
+videoTab.add(settings.video.resolution, "height", 400, 600)
+videoTab.addColor(settings.video, "bgColor")
+actionTab.add(testFns, "playHadouken")
+
+window.gui = gui
 document.body.appendChild(canvas)
-document.body.appendChild(button)
 
-button.addEventListener("click", function (e) {
-  audioSystem.play(cache.hadouken)
+function startGame () {
+  bg.loop(cache.sounds.background)
+  raf(makeRender(gl))
+  setInterval(makeUpdate(), 25)
+}
+
+loadStream.loadMany([
+  new SoundAsset("background", "public/sounds/bgm1.mp3"),
+  new SoundAsset("hadouken", "public/sounds/hadouken.mp3"),
+])
+loadStream.on("load", function (asset) {
+  let key = null
+
+  if (asset instanceof SoundAsset)      key = "sounds"
+  else if (asset instanceof ImageAsset) key = "sprites"
+  cache[key][asset.name] = asset.data
 })
-
-raf(makeRender(gl))
-setInterval(makeUpdate(), 25)
-
-loadSound(audioSystem.actx, "public/sounds/bgm1.mp3", function (err, buffer) {
-  cache.bgm1 = buffer
-  audioSystem.playBackground(cache.bgm1, true)
+loadStream.on("error", function (asset) {
+  console.log(asset.name + " failed to load")
 })
-
-loadSound(audioSystem.actx, "public/sounds/hadouken.mp3", function (err, buffer) {
-  cache.hadouken = buffer
+loadStream.on("done", function () {
+  startGame()
 })

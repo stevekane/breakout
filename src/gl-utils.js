@@ -1,8 +1,12 @@
 var utils = {}
 
 var clearContext = function (gl, color) {
-  if (color) gl.clearColor(color.r, color.g, color.b, color.a)
-  else       gl.clearColor(0.0, 0.0, 0.0, 0.0)
+  let r = color[0] / 255
+  let g = color[1] / 255
+  let b = color[2] / 255
+  let a = color[3]
+  
+  gl.clearColor(r, g, b, a)
   gl.clear(gl.COLOR_BUFFER_BIT)
 }
 
