@@ -14,6 +14,10 @@ function SoundAsset (name, path) {
   Asset.call(this, name, path)
 }
 
+function ShaderAsset (name, path) {
+  Asset.call(this, name, path)
+}
+
 function LoadStream () {
   let audioCtx      = new (AudioContext || webkitAudioContext)()
   let inFlightCount = 0
@@ -52,8 +56,9 @@ function LoadStream () {
 
   this.load = (asset) => {
     inFlightCount++
-    if      (asset instanceof SoundAsset) loadSound(asset)
-    else if (asset instanceof ImageAsset) loadImage(asset)
+    if      (asset instanceof SoundAsset)  loadSound(asset)
+    else if (asset instanceof ImageAsset)  loadImage(asset)
+    else if (asset instanceof ShaderAsset) loadImage(asset)
     else                                  throw new Error("invalid asset")
   }
 

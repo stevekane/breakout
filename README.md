@@ -35,8 +35,10 @@ I believe this game should be built in seven days.  It costs no money to develop
 other than of course the ever-present opportunity cost.
 ##What are the midterm and final checks to verify success?
 ###Day One
-Sprite graphics can be displayed in center of screen.  Sounds can be played.
+Sound system created.  Basic rendering and update loop created and working.  
+Basic assets can be loaded.
 ###Day Two
+Sprite graphics can be displayed in center of screen.
 Sprites support animations which are stored by name and can be played from
 console command line.
 User input can be processed from the keyboard only.  Key mappings can be defined

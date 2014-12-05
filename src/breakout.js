@@ -1,7 +1,8 @@
 let datGui = require("dat-gui")
-let {clearContext} = require("./gl-utils")
+let {LoadedProgram, clearContext} = require("./gl-utils")
+let Loader = require("./Loader")
 let {LoadStream, ImageAsset, SoundAsset} = require("./loaders")
-let AudioSystem = require("./audio")
+let AudioSystem = require("./AudioSystem")
 
 let raf         = window.requestAnimationFrame
 let setInterval = window.setInterval
@@ -11,53 +12,51 @@ let {main, bg}  = audioSystem.channels
 let canvas      = document.createElement("canvas")
 let gui         = new datGui.GUI()
 
-//perhaps wrap this?
 let gl = canvas.getContext("webgl")
 
 let assets = {
   sounds: {
     background: "public/sounds/bgm1.mp3",
     hadouken:   "public/sounds/hadouken.mp3" 
+  },
+  textures: {
+    paddle: "public/spritesheets/paddle.png" 
+  },
+  shaders: {
+    baseF: "public/shaders/base.fragment",
+    baseV: "public/shaders/base.vertex"
   }
 }
 
+//initial config
+canvas.height = 600
+canvas.width  = 400
+bg.volume     = 0
+
 let settings = {
-  audio: {
-    bgVolume:   0.0,
-    mainVolume: 1.0
-  },
-  video: {
-    resolution: {
-      width: 400,
-      height: 600
-    },
-    bgColor: [100, 0, 0, 1.0]
-  }
+  bgColor: [100, 0, 0, 1.0]
 }
 
 let testFns = {
   playHadouken: () => main.play(cache.sounds.hadouken)
 }
 
-let loadStream = new LoadStream
+let loader = new Loader
+
 let cache = {
-  sounds:  {},
-  sprites: {}
+  sounds:   {},
+  textures: {},
+  shaders:  {},
+  programs: {}
 }
 
 function makeUpdate () {
-  return function update () {
-    bg.volume   = settings.audio.bgVolume
-    main.volume = settings.audio.mainVolume
-  }
+  return function update () {}
 }
 
 function makeRender (gl) {
   return function render () {
-    gl.canvas.width  = settings.video.resolution.width
-    gl.canvas.height = settings.video.resolution.height
-
-    clearContext(gl, settings.video.bgColor)
+    clearContext(gl, settings.bgColor)
     raf(render) 
   }
 }
@@ -69,14 +68,13 @@ let actionTab = gui.addFolder("Actions")
 audioTab.open()
 videoTab.open()
 actionTab.open()
-audioTab.add(settings.audio, "bgVolume", [0.0, 0.5, 1.0])
-audioTab.add(settings.audio, "mainVolume", [0.0, 0.5, 1.0])
-videoTab.add(settings.video.resolution, "width", 200, 400)
-videoTab.add(settings.video.resolution, "height", 400, 600)
-videoTab.addColor(settings.video, "bgColor")
+audioTab.add(bg, "volume", [0.0, 0.5, 1.0])
+audioTab.add(main, "volume", [0.0, 0.5, 1.0])
+videoTab.add(gl.canvas, "width", 200, 400)
+videoTab.add(gl.canvas, "height", 400, 600)
+videoTab.addColor(settings, "bgColor")
 actionTab.add(testFns, "playHadouken")
 
-window.gui = gui
 document.body.appendChild(canvas)
 
 function startGame () {
@@ -85,20 +83,10 @@ function startGame () {
   setInterval(makeUpdate(), 25)
 }
 
-loadStream.loadMany([
-  new SoundAsset("background", "public/sounds/bgm1.mp3"),
-  new SoundAsset("hadouken", "public/sounds/hadouken.mp3"),
-])
-loadStream.on("load", function (asset) {
-  let key = null
-
-  if (asset instanceof SoundAsset)      key = "sounds"
-  else if (asset instanceof ImageAsset) key = "sprites"
-  cache[key][asset.name] = asset.data
-})
-loadStream.on("error", function (asset) {
-  console.log(asset.name + " failed to load")
-})
-loadStream.on("done", function () {
+loader.loadAssets(assets, (err, {sounds, textures, shaders}) => {
+  cache.sounds   = sounds
+  cache.shaders  = shaders
+  cache.textures = textures
+  cache.programs.base = new LoadedProgram(gl, shaders.basev, shaders.basec)
   startGame()
 })

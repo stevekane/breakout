@@ -1,5 +1,3 @@
-var utils = {}
-
 var clearContext = function (gl, color) {
   let r = color[0] / 255
   let g = color[1] / 255
@@ -83,7 +81,4 @@ var LoadedProgram = function (gl, vSrc, fSrc) {
   return lp 
 }
 
-utils.clearContext  = clearContext
-utils.updateBuffer  = updateBuffer
-utils.LoadedProgram = LoadedProgram
-module.exports      = utils
+module.exports = {clearContext, updateBuffer, LoadedProgram}

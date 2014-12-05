@@ -10,7 +10,16 @@ function writeError (res, err) {
   res.end()
 }
 
-function sendFile (res, data) {
+function sendFile (res, ext, data) {
+  var mimeType = "text"
+
+  if      (ext === ".js")  mimeType = "text/javascript"
+  else if (ext === ".png") mimeType = "image/png"
+  else if (ext === ".jpg") mimeType = "image/jpg"
+  else if (ext === ".mp3") mimeType = "audio/mpeg3"
+  else if (ext === ".ogg") mimeType = "audio/ogg"
+
+  res.setHeader("Content-type", mimeType)
   res.write(data)
   res.end()
 }
@@ -22,7 +31,7 @@ var server = http.createServer(function (req, res) {
 
   fs.readFile(fileExt ? filePath : htmlPath, function (err, data) {
     if (err) return writeError(res, err)
-    else     return sendFile(res, data)
+    else     return sendFile(res, fileExt, data)
   })
 })
 
