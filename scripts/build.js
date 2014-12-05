@@ -2,8 +2,11 @@ var browserify = require("browserify")
 var to5        = require("6to5-browserify")
 var path       = require('path')
 var fs         = require('fs')
-var targetPath = path.join("..", "src", "breakout.js")
-var bundlePath = path.join("public", "breakout.js")
+var fileName   = process.argv[2]
+var targetPath = path.join("..", "src", fileName)
+var bundlePath = path.join("public", fileName)
+
+if (!fileName) process.exit(1)
 
 browserify({debug: true})
   .transform(to5)

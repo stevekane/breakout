@@ -3,7 +3,6 @@ var lr       = require("livereload")
 var fs       = require("fs")
 var path     = require("path")
 var PORT     = 4000
-var htmlPath = "./breakout.html"
 
 function writeError (res, err) {
   res.writeHead(404)
@@ -24,10 +23,15 @@ function sendFile (res, ext, data) {
   res.end()
 }
 
+var routes = {
+  "/draw": "./draw.html",
+}
+
 var server = http.createServer(function (req, res) {
   var filePath = "." + req.url
   var fileName = path.basename(filePath)
   var fileExt  = path.extname(fileName)
+  var htmlPath = routes[req.url] || "./breakout.html"
 
   fs.readFile(fileExt ? filePath : htmlPath, function (err, data) {
     if (err) return writeError(res, err)
