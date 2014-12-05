@@ -60,17 +60,20 @@ const MAX_BOX_COUNT   = 1
 const BOX_POINT_COUNT = 12
 const POINT_DIMENSION = 2
 
-let vShader     = Shader(gl, gl.VERTEX_SHADER, findEl("vertex").text)
-let fShader     = Shader(gl, gl.FRAGMENT_SHADER, findEl("fragment").text)
-let program     = Program(gl, vShader, fShader)
-let posLocation = gl.getAttribLocation(program, "a_position")
-let boxBuffer   = gl.createBuffer()
-let boxes       = new Float32Array(MAX_BOX_COUNT * BOX_POINT_COUNT)
+let vShader   = Shader(gl, gl.VERTEX_SHADER, findEl("vertex").text)
+let fShader   = Shader(gl, gl.FRAGMENT_SHADER, findEl("fragment").text)
+let program   = Program(gl, vShader, fShader)
+let posPtr    = gl.getAttribLocation(program, "a_position")
+let colorPtr  = gl.getUniformLocation(program, "u_color")
+let boxBuffer = gl.createBuffer()
+let boxes     = new Float32Array(MAX_BOX_COUNT * BOX_POINT_COUNT)
+let boxColor  = [0.0, 1.0, 1.0, 1.0]
 
 //TODO: presently in clipspace -1 -> 1
 setBox(boxes, 0, -1, -1, 2, 2)
 gl.useProgram(program)
-updateBuffer(gl, boxBuffer, posLocation, POINT_DIMENSION, boxes)
+gl.uniform4f(colorPtr, boxColor[0], boxColor[1], boxColor[2], boxColor[3])
+updateBuffer(gl, boxBuffer, posPtr, POINT_DIMENSION, boxes)
 gl.drawArrays(gl.TRIANGLES, 0, 6)
 
 window.gl      = gl
