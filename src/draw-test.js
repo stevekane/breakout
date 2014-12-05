@@ -1,3 +1,4 @@
+let body   = document.body
 let canvas = document.createElement("canvas")
 let gl     = canvas.getContext("webgl")
 let findEl = (x) => document.getElementById(x)
@@ -50,7 +51,7 @@ function setBox (boxes, index, x, y, w, h) {
 //:: glContext, glBuffer, Int, Int, Float32Array
 function updateBuffer (gl, buffer, position, chunkSize, data) {
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
+  gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW)
   gl.enableVertexAttribArray(position)
   gl.vertexAttribPointer(position, chunkSize, gl.FLOAT, false, 0, 0)
 }
@@ -67,18 +68,38 @@ let fShader   = Shader(gl, gl.FRAGMENT_SHADER, findEl("fragment").text)
 let program   = Program(gl, vShader, fShader)
 let posPtr    = gl.getAttribLocation(program, "a_position")
 let colorPtr  = gl.getUniformLocation(program, "u_color")
+let resPtr    = gl.getUniformLocation(program, "u_resolution")
 let boxBuffer = gl.createBuffer()
 let boxes     = new Float32Array(MAX_BOX_COUNT * BOX_POINT_COUNT)
 let boxColor  = [0.0, 1.0, 1.0, 1.0]
 
 //TODO: presently in clipspace -1 -> 1
-setBox(boxes, 0, -1, -1, 1, 1)
-setBox(boxes, 1, 0, 0, 2, 2)
+setBox(boxes, 0, 0, 0, 30, 30)
+setBox(boxes, 1, 50, 50, 30, 30)
 
-gl.useProgram(program)
-gl.uniform4f(colorPtr, boxColor[0], boxColor[1], boxColor[2], boxColor[3])
-updateBuffer(gl, boxBuffer, posPtr, POINT_DIMENSION, boxes)
-gl.drawArrays(gl.TRIANGLES, 0, BOX_TRIANGLE_COUNT * MAX_BOX_COUNT)
+function fitTo (reference, element) {
+  element.width  = reference.innerWidth
+  element.height = reference.innerHeight
+}
+
+function makeRender () {
+  return function render () {
+    let w = canvas.clientWidth
+    let h = canvas.clientHeight
+
+    gl.clearColor(0.0, 0.0, 0.0, 1.0)
+    gl.clear(gl.COLOR_BUFFER_BIT)
+    gl.useProgram(program)
+    gl.uniform2f(resPtr, w, h)
+    gl.uniform4f(colorPtr, boxColor[0], boxColor[1], boxColor[2], boxColor[3])
+    updateBuffer(gl, boxBuffer, posPtr, POINT_DIMENSION, boxes)
+    gl.drawArrays(gl.TRIANGLES, 0, BOX_TRIANGLE_COUNT * MAX_BOX_COUNT)
+    requestAnimationFrame(render)
+  }
+}
 
 window.gl = gl
 document.body.appendChild(canvas)
+requestAnimationFrame(makeRender())
+document.addEventListener("DOMContentLoaded", () => fitTo(window, canvas))
+window.addEventListener("resize", ({target}) => fitTo(target, canvas))
