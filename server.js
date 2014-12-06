@@ -25,6 +25,7 @@ function sendFile (res, ext, data) {
 
 var routes = {
   "/draw": "./draw.html",
+  "/ld":   "./ld.html"
 }
 
 var server = http.createServer(function (req, res) {

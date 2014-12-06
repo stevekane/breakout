@@ -73,9 +73,8 @@ let boxBuffer = gl.createBuffer()
 let boxes     = new Float32Array(MAX_BOX_COUNT * BOX_POINT_COUNT)
 let boxColor  = [0.0, 1.0, 1.0, 1.0]
 
-//TODO: presently in clipspace -1 -> 1
 setBox(boxes, 0, 0, 0, 30, 30)
-setBox(boxes, 1, 50, 50, 30, 30)
+setBox(boxes, 1, 500, 50, 200, 200)
 
 function fitTo (reference, element) {
   element.width  = reference.innerWidth
