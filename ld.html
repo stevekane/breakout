@@ -10,10 +10,19 @@
 </head>
 <body>
   <script id="vertex" type="x-shader/x-vertex">
+    precision highp float;
+
     attribute vec2 a_position;
 
+    vec2 norm (vec2 position) {
+      return position * 2.0 - 1.0; 
+    }
+
     void main() {
-      gl_Position = vec4(a_position, 0, 1);
+      mat2 clipSpaceTransform = mat2(1.0, 0.0, 0.0, -1.0);
+      vec2 position           = clipSpaceTransform * norm(a_position);
+
+      gl_Position = vec4(position, 0, 1);
     }
   </script>
 
@@ -21,7 +30,7 @@
     precision highp float;
 
     void main() {
-      gl_FragColor = vec4(1, 1, 0, 1);
+      gl_FragColor = vec4(0, 1, 0, 1);
     }
   </script>
 

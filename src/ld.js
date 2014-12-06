@@ -3,6 +3,10 @@ let gl        = canvas.getContext("webgl")
 let vertexSrc = document.getElementById("vertex").text
 let fragSrc   = document.getElementById("fragment").text
 
+const POINT_DIMENSION = 2
+const POINTS_PER_BOX  = 6
+const BOX_LENGTH      = POINT_DIMENSION * POINTS_PER_BOX
+
 //TODO: inserted this janky crap to deal with scrollbars
 //:: GLContext -> DomElement
 function fitTo (gl, target) {
@@ -59,16 +63,38 @@ function updateBuffer (gl, buffer, loc, chunkSize, data) {
   gl.vertexAttribPointer(loc, chunkSize, gl.FLOAT, false, 0, 0)
 }
 
-function setBox (boxArray, index, x, y, w, h) {}
+function setBox (boxArray, index, x, y, w, h) {
+  let i  = BOX_LENGTH * index
+  let x1 = x
+  let y1 = y 
+  let x2 = x + w
+  let y2 = y + h
 
-const POINT_DIMENSION = 2
+  boxArray[i]    = x1
+  boxArray[i+1]  = y1
+  boxArray[i+2]  = x2
+  boxArray[i+3]  = y1
+  boxArray[i+4]  = x1
+  boxArray[i+5]  = y2
 
+  boxArray[i+6]  = x1
+  boxArray[i+7]  = y2
+  boxArray[i+8]  = x2
+  boxArray[i+9]  = y1
+  boxArray[i+10] = x2
+  boxArray[i+11] = y2
+}
+
+let BOX_COUNT   = 10
+let activeBoxes = 1
 let vs          = Shader(gl, gl.VERTEX_SHADER, vertexSrc)
 let fs          = Shader(gl, gl.FRAGMENT_SHADER, fragSrc)
 let program     = Program(gl, vs, fs)
 let buffer      = Buffer(gl)
-let boxes       = new Float32Array([-1.0, 1.0, 0.0, 0.0, -1.0, -1.0])
+let boxes       = new Float32Array(BOX_COUNT * BOX_LENGTH)
 let posLocation = gl.getAttribLocation(program, "a_position")
+
+setBox(boxes, 0, 0, 0, 1, 1)
 
 /* 
  * Create a GL program (GL Shader(vertex), GL Shader(fragment))
@@ -94,7 +120,7 @@ function makeAnimate (stuff) {
     gl.clearColor(1.0, 1.0, 1.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT)
     updateBuffer(gl, buffer, posLocation, POINT_DIMENSION, boxes)
-    gl.drawArrays(gl.TRIANGLES, 0, 3)
+    gl.drawArrays(gl.TRIANGLES, 0, activeBoxes * POINTS_PER_BOX)
     requestAnimationFrame(animate)
   }
 }
