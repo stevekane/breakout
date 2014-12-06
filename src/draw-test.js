@@ -98,8 +98,11 @@ function makeRender () {
   }
 }
 
-window.gl = gl
-document.body.appendChild(canvas)
-requestAnimationFrame(makeRender())
-document.addEventListener("DOMContentLoaded", () => fitTo(window, canvas))
+function boot () {
+  fitTo(window, canvas) 
+  document.body.appendChild(canvas)
+  requestAnimationFrame(makeRender())
+}
+
+document.addEventListener("DOMContentLoaded", boot)
 window.addEventListener("resize", ({target}) => fitTo(target, canvas))
