@@ -7,17 +7,28 @@ const POINT_DIMENSION = 2
 const POINTS_PER_BOX  = 6
 const BOX_LENGTH      = POINT_DIMENSION * POINTS_PER_BOX
 
-//TODO: inserted this janky crap to deal with scrollbars
-//:: GLContext -> DomElement
-function fitTo (gl, target) {
-  let canvas = gl.canvas
+let maxFromWidth  = (ratio, width) => width / ratio
+let maxFromHeight = (ratio, height) => height * ratio
 
-  canvas.width  = target.innerWidth * .9
-  canvas.height = target.innerHeight * .9
+//get the target dimensions
+//fit largest possible box of world ratio into these dimensions
+//resize canvas to these dimensions
+//update viewport with canvas dimensions
+//:: => GLContext -> DOMElement -> World
+function resizeView (gl, target, world) {
+  let canvas      = gl.canvas
+  let ratio       = world.ratio
+  let maxWidth    = target.innerWidth
+  let maxHeight   = target.innerHeight
+  let targetRatio = maxWidth / maxHeight
+  let useWidth    = ratio >= targetRatio
+  let w           = useWidth ? maxWidth : maxFromHeight(ratio, maxHeight)
+  let h           = useWidth ? maxFromWidth(ratio, maxWidth) : maxHeight
+
+  canvas.width  = w * .9
+  canvas.height = h * .9
   gl.viewport(0, 0, canvas.width, canvas.height)
 }
-
-//Shader: Program that is executed in parallel on the GPU
 
 //:: => GLContext -> ENUM (VERTEX || FRAGMENT) -> String (Code)
 function Shader (gl, type, src) {
@@ -46,6 +57,15 @@ function Program (gl, vs, fs) {
 //:: => GLContext -> Buffer
 function Buffer (gl) {
   return gl.createBuffer()
+}
+
+//:: => Int -> Int
+function World (width, height) {
+  return {
+    ratio: width / height,
+    width, 
+    height
+  }
 }
 
 //Coordinate system for webGL is clipspace which is -1 -> 1 on both x and y
@@ -93,26 +113,11 @@ let program     = Program(gl, vs, fs)
 let buffer      = Buffer(gl)
 let boxes       = new Float32Array(BOX_COUNT * BOX_LENGTH)
 let posLocation = gl.getAttribLocation(program, "a_position")
+let world       = World(1920, 1080)
+
+window.world = world
 
 setBox(boxes, 0, 0, 0, 1, 1)
-
-/* 
- * Create a GL program (GL Shader(vertex), GL Shader(fragment))
- * Link the program to the GL context (this is stupid bookkeeping)
- * Use this GL program
- *
- * Send the GL program Data that it will use in the execution of the shaders
- *  vertex shaders: this is usually an array of points
- *  fragment shaders: this is usually textures, colors, filters, blah blah
- * 
- * Call the GL draw function
- *  1) run your vertex shaders in parallel for the chunks of data you have provided
- *  this usually means the big ass array of points in space you defined
- *
- *  2) run your fragment shaders in parallel and writes the resulting bitmap
- *  to a buffer.  By default, this buffer is the actual screen buffer
- *
- */
 
 function makeAnimate (stuff) {
   gl.useProgram(program)
@@ -128,8 +133,10 @@ function makeAnimate (stuff) {
 //DOM Callback stuff
 document.addEventListener("DOMContentLoaded", function () {
   document.body.appendChild(canvas)
-  fitTo(gl, window)
+  resizeView(gl, window, world)
   requestAnimationFrame(makeAnimate())
 })
 
-window.addEventListener("resize", ({target}) => fitTo(gl, target))
+window.addEventListener("resize", function ({target}) {
+  resizeView(gl, target, world)
+})
