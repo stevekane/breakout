@@ -2,6 +2,15 @@ let canvas    = document.createElement("canvas")
 let gl        = canvas.getContext("webgl")
 let vertexSrc = document.getElementById("vertex").text
 let fragSrc   = document.getElementById("fragment").text
+let Loader    = require("./Loader")
+let assets    = {
+  textures: {
+    maptiles: "/public/spritesheets/maptiles.png",
+    paddle:   "/public/spritesheets/paddle.png"
+  },
+  sounds: {},
+  shaders: {} 
+}
 
 const POINT_DIMENSION = 2
 const POINTS_PER_BOX  = 6
@@ -10,10 +19,6 @@ const BOX_LENGTH      = POINT_DIMENSION * POINTS_PER_BOX
 let maxFromWidth  = (ratio, width) => width / ratio
 let maxFromHeight = (ratio, height) => height * ratio
 
-//get the target dimensions
-//fit largest possible box of world ratio into these dimensions
-//resize canvas to these dimensions
-//update viewport with canvas dimensions
 //:: => GLContext -> DOMElement -> World
 function resizeView (gl, target, world) {
   let canvas      = gl.canvas
@@ -57,6 +62,20 @@ function Program (gl, vs, fs) {
 //:: => GLContext -> Buffer
 function Buffer (gl) {
   return gl.createBuffer()
+}
+
+//:: => GLContext -> UniformLocation -> Image -> Texture
+function Texture (gl, image) {
+  let texture = gl.createTexture();
+
+  gl.activeTexture(gl.TEXTURE0)
+  gl.bindTexture(gl.TEXTURE_2D, texture)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image); 
+  return texture
 }
 
 //:: => Int -> Int
@@ -105,38 +124,80 @@ function setBox (boxArray, index, x, y, w, h) {
   boxArray[i+11] = y2
 }
 
-let BOX_COUNT   = 10
-let activeBoxes = 1
-let vs          = Shader(gl, gl.VERTEX_SHADER, vertexSrc)
-let fs          = Shader(gl, gl.FRAGMENT_SHADER, fragSrc)
-let program     = Program(gl, vs, fs)
-let buffer      = Buffer(gl)
-let boxes       = new Float32Array(BOX_COUNT * BOX_LENGTH)
-let posLocation = gl.getAttribLocation(program, "a_position")
-let world       = World(1920, 1080)
+function TextureArray (size) {
+  let textureSize = 12
+  let texArray    = new Float32Array(size * textureSize)
+ 
+  for (var i = 0, len = texArray.length; i < len; i+=textureSize) {
+    texArray[i]    = 0
+    texArray[i+1]  = 0
+    texArray[i+2]  = 1
+    texArray[i+3]  = 0
+    texArray[i+4]  = 0
+    texArray[i+5]  = 1
 
-window.world = world
+    texArray[i+6]  = 0
+    texArray[i+7]  = 1
+    texArray[i+8]  = 1
+    texArray[i+9]  = 0
+    texArray[i+10] = 1
+    texArray[i+11] = 1
+  } 
+  return texArray
+}
 
-setBox(boxes, 0, 0, 0, 1, 1)
+let BOX_COUNT         = 10
+let activeBoxes       = 2
+let vs                = Shader(gl, gl.VERTEX_SHADER, vertexSrc)
+let fs                = Shader(gl, gl.FRAGMENT_SHADER, fragSrc)
+let program           = Program(gl, vs, fs)
+let posBuffer         = Buffer(gl)
+let texBuffer         = Buffer(gl)
+let boxes             = new Float32Array(BOX_COUNT * BOX_LENGTH)
+let texArray          = TextureArray(BOX_COUNT)
+let posLocation       = gl.getAttribLocation(program, "a_position")
+let texLocation       = gl.getAttribLocation(program, "a_texCoord")
+let worldSizeLocation = gl.getUniformLocation(program, "u_worldSize")
+let imageLocation     = gl.getUniformLocation(program, "u_image")
+let world             = World(1920, 1080)
+let loader            = new Loader()
+let paddleImage       
+let paddleTexture
+
+window.texArray = texArray
+window.boxes    = boxes
+
+
+setBox(boxes, 0, 800, 800, 112, 25)
+setBox(boxes, 1, 400, 400, 112, 25)
 
 function makeAnimate (stuff) {
   gl.useProgram(program)
+  gl.activeTexture(gl.TEXTURE0)
+  gl.uniform2f(worldSizeLocation, world.width, world.height)
+  gl.uniform1i(imageLocation, 0)
+  gl.bindTexture(gl.TEXTURE_2D, paddleTexture)
+  updateBuffer(gl, texBuffer, texLocation, POINT_DIMENSION, texArray)
+
   return function animate () {
     gl.clearColor(1.0, 1.0, 1.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT)
-    updateBuffer(gl, buffer, posLocation, POINT_DIMENSION, boxes)
+    updateBuffer(gl, posBuffer, posLocation, POINT_DIMENSION, boxes)
     gl.drawArrays(gl.TRIANGLES, 0, activeBoxes * POINTS_PER_BOX)
     requestAnimationFrame(animate)
   }
 }
 
-//DOM Callback stuff
 document.addEventListener("DOMContentLoaded", function () {
-  document.body.appendChild(canvas)
-  resizeView(gl, window, world)
-  requestAnimationFrame(makeAnimate())
-})
-
-window.addEventListener("resize", function ({target}) {
-  resizeView(gl, target, world)
+  loader.loadAssets(assets, function (err, results) {
+    paddleImage   = results.textures.paddle
+    paddleTexture = Texture(gl, paddleImage)
+  
+    document.body.appendChild(canvas)
+    resizeView(gl, window, world)
+    requestAnimationFrame(makeAnimate())
+    window.addEventListener("resize", function ({target}) {
+      resizeView(gl, target, world)
+    })
+  })
 })
