@@ -30,8 +30,8 @@ function resizeView (gl, target, world) {
   let w           = useWidth ? maxWidth : maxFromHeight(ratio, maxHeight)
   let h           = useWidth ? maxFromWidth(ratio, maxWidth) : maxHeight
 
-  canvas.width  = w * .9
-  canvas.height = h * .9
+  canvas.width  = w
+  canvas.height = h
   gl.viewport(0, 0, canvas.width, canvas.height)
 }
 
@@ -64,17 +64,19 @@ function Buffer (gl) {
   return gl.createBuffer()
 }
 
-//:: => GLContext -> UniformLocation -> Image -> Texture
+//:: => GLContext -> Image -> Texture
 function Texture (gl, image) {
   let texture = gl.createTexture();
 
   gl.activeTexture(gl.TEXTURE0)
   gl.bindTexture(gl.TEXTURE_2D, texture)
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image); 
+  //(target, level, internalformat, width, height, border, format, type, pixels);
   return texture
 }
 
@@ -86,13 +88,6 @@ function World (width, height) {
     height
   }
 }
-
-//Coordinate system for webGL is clipspace which is -1 -> 1 on both x and y
-//  Point(-1, -1), Point(1, -1), Point(-1, 1)
-//express the data above on a single array
-//  [-1.0, -1.0, 1.0, -1.0, -1.0, 1.0] -- standard JS Array  -- create with new Array(SIZE)
-//express as Float32Array
-//  new Float32Array([-1.0, -1.0, 1.0, -1.0, -1.0, 1.0])
 
 //:: => GLContext -> Buffer -> Int -> Int -> Float32Array
 function updateBuffer (gl, buffer, loc, chunkSize, data) {
@@ -172,6 +167,8 @@ setBox(boxes, 0, 800, 800, 112, 25)
 setBox(boxes, 1, 400, 400, 112, 25)
 
 function makeAnimate (stuff) {
+  gl.enable(gl.BLEND)
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
   gl.useProgram(program)
   gl.activeTexture(gl.TEXTURE0)
   gl.uniform2f(worldSizeLocation, world.width, world.height)
@@ -180,7 +177,8 @@ function makeAnimate (stuff) {
   updateBuffer(gl, texBuffer, texLocation, POINT_DIMENSION, texArray)
 
   return function animate () {
-    gl.clearColor(1.0, 1.0, 1.0, 1.0)
+    gl.clearColor(1.0, 1.0, 1.0, 0.0)
+    gl.colorMask(true, true, true, true)
     gl.clear(gl.COLOR_BUFFER_BIT)
     updateBuffer(gl, posBuffer, posLocation, POINT_DIMENSION, boxes)
     gl.drawArrays(gl.TRIANGLES, 0, activeBoxes * POINTS_PER_BOX)

@@ -8,6 +8,7 @@
       padding: 0px; 
       margin: 0px; 
       background-color: black;
+      overflow: hidden;
     }
   </style>
 
@@ -47,8 +48,7 @@
     varying vec2 v_texCoord;
 
     void main() {
-      //gl_FragColor = vec4(0, 1, 0, 1);
-      gl_FragColor = texture2D(u_image, v_texCoord);
+      gl_FragColor = texture2D(u_image, v_texCoord).rgba;
     }
   </script>
 
