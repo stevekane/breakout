@@ -3,37 +3,12 @@ let gl        = canvas.getContext("webgl")
 let vertexSrc = document.getElementById("vertex").text
 let fragSrc   = document.getElementById("fragment").text
 let Loader    = require("./Loader")
-let assets    = {
-  textures: {
-    maptiles: "/public/spritesheets/maptiles.png",
-    paddle:   "/public/spritesheets/paddle.png"
-  },
-  sounds: {},
-  shaders: {} 
-}
+let {resizeView} = require("./view")
+
 
 const POINT_DIMENSION = 2
 const POINTS_PER_BOX  = 6
 const BOX_LENGTH      = POINT_DIMENSION * POINTS_PER_BOX
-
-let maxFromWidth  = (ratio, width) => width / ratio
-let maxFromHeight = (ratio, height) => height * ratio
-
-//:: => GLContext -> DOMElement -> World
-function resizeView (gl, target, world) {
-  let canvas      = gl.canvas
-  let ratio       = world.ratio
-  let maxWidth    = target.innerWidth
-  let maxHeight   = target.innerHeight
-  let targetRatio = maxWidth / maxHeight
-  let useWidth    = ratio >= targetRatio
-  let w           = useWidth ? maxWidth : maxFromHeight(ratio, maxHeight)
-  let h           = useWidth ? maxFromWidth(ratio, maxWidth) : maxHeight
-
-  canvas.width  = w
-  canvas.height = h
-  gl.viewport(0, 0, canvas.width, canvas.height)
-}
 
 //:: => GLContext -> ENUM (VERTEX || FRAGMENT) -> String (Code)
 function Shader (gl, type, src) {
@@ -76,17 +51,17 @@ function Texture (gl, image) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image); 
-  //(target, level, internalformat, width, height, border, format, type, pixels);
   return texture
 }
 
 //:: => Int -> Int
 function World (width, height) {
-  return {
-    ratio: width / height,
-    width, 
-    height
-  }
+  let world = {width, height}
+
+  Object.defineProperty(world, "ratio", {
+    get() { return width/ height} 
+  })
+  return world
 }
 
 //:: => GLContext -> Buffer -> Int -> Int -> Float32Array
@@ -96,6 +71,41 @@ function updateBuffer (gl, buffer, loc, chunkSize, data) {
   gl.enableVertexAttribArray(loc)
   gl.vertexAttribPointer(loc, chunkSize, gl.FLOAT, false, 0, 0)
 }
+
+/* 
+ * We now know that every Sprite that we wish to render must have:
+ *   -Points defined for two triangles to form the box
+ *   -center point (used in rotation and scaling)
+ *   -Scalars for x-scale and y-scale
+ *   -rotation in radians
+ *   -reference to spritesheet
+ *   -ulX, ulY, lrX, lrY (upper,lower) coordinates for frame we wish to draw
+ *
+ * sprite = {
+ *   box:       AABB,
+ *   center:    {x: Float, y: Float}
+ *   scales:    {x: Float, y: Float},
+ *   rotation:  Float
+ *   sheetName: String,
+ *   frameBox:  AABB
+ * }
+ *
+ * What is a vertex?
+ *  Vertex is a blob of data sliced from many arrays (buffers) that is read
+ *  in a single pass of the vertex shader
+ *
+ *  [x,y,x1,y1...]  -- step by 2
+ *
+ *  [s, s1...] -- step by 1
+ *
+ *  in first pass of the vertex shader I would have [x,y] and s
+ *
+ * boxes:      Float32Array(size=12) -- chunkSize = 2
+ * centers:    Float32Array(size=12) -- chunkSize = 2
+ * scales:     Float32Array(size=12) -- chunkSize = 2
+ * rotations:  Float32Array(size=6)  -- chunkSize = 1
+ * frameBoxes: Float32Array(size=12) -- chunkSize = 2
+ */
 
 function setBox (boxArray, index, x, y, w, h) {
   let i  = BOX_LENGTH * index
@@ -158,9 +168,14 @@ let world             = World(1920, 1080)
 let loader            = new Loader()
 let paddleImage       
 let paddleTexture
-
-window.texArray = texArray
-window.boxes    = boxes
+let assets    = {
+  textures: {
+    maptiles: "/public/spritesheets/maptiles.png",
+    paddle:   "/public/spritesheets/paddle.png"
+  },
+  sounds: {},
+  shaders: {} 
+}
 
 
 setBox(boxes, 0, 800, 800, 112, 25)
