@@ -1,6 +1,8 @@
 let maxFromWidth  = (ratio, width) => width / ratio
 let maxFromHeight = (ratio, height) => height * ratio
 
+//TODO: Proposed new signature below
+//:: => Element, TargetElement, Ratio (Float)
 //:: => GLContext -> DOMElement -> World
 function resizeView (gl, target, world) {
   let canvas      = gl.canvas
