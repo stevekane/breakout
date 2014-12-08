@@ -1,33 +1,40 @@
-let canvas     = document.createElement("canvas")
-let gl         = canvas.getContext("webgl")
-let vertexSrc  = document.getElementById("vertex").text
-let fragSrc    = document.getElementById("fragment").text
+let {Paddle} = require("./assemblages")
 let Loader     = require("./Loader")
 let GLRenderer = require("./GLRenderer")
-let {resizeView} = require("./view")
+let canvas     = document.createElement("canvas")
+let vertexSrc  = document.getElementById("vertex").text
+let fragSrc    = document.getElementById("fragment").text
 
-//:: => Int -> Int
-function World (width, height) {
-  let world = {width, height}
+/*
+ * Game
+ *    Cache
+ *    Renderer
+ *    GUIRenderer?
+ *    AudioSystem
+ *    SceneManager
+ *        [Scenes]
+ *            World
+ *              Entities
+ *              Camera
+ */
 
-  Object.defineProperty(world, "ratio", {
-    get() { return width/ height } 
-  })
-  return world
-}
+const UPDATE_INTERVAL = 25
+const MAX_COUNT       = 1000
 
-const MAX_COUNT = 1000
-
-let world    = World(1920, 1080)
-let loader   = new Loader()
-let renderer = new GLRenderer(canvas, vertexSrc, fragSrc, MAX_COUNT)
-let assets   = {
+let loader       = new Loader()
+let rendererOpts = { maxSpriteCount: MAX_COUNT }
+let renderer     = new GLRenderer(canvas, vertexSrc, fragSrc, rendererOpts)
+let assets       = {
   textures: {
     maptiles: "/public/spritesheets/maptiles.png",
     paddle:   "/public/spritesheets/paddle.png"
   },
   sounds:  {},
   shaders: {} 
+}
+
+function makeUpdate () {
+  return function update () {}
 }
 
 function makeAnimate () {
@@ -37,28 +44,23 @@ function makeAnimate () {
   }
 }
 
-function addSprites (renderer, count) {
-  let width  = 112
-  let height = 25
-  let i      = -1
-  let x, y
-
-  while (++i < count) {
-    x = Math.random() * 1920
-    y = Math.random() * 1080
-    renderer.addSprite(x, y, width, height) 
-  }
+function startGame () {
+  loader.loadAssets(assets, function (err, results) {
+    setInterval(makeUpdate(), UPDATE_INTERVAL)
+    requestAnimationFrame(makeAnimate())
+  })
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-  loader.loadAssets(assets, function (err, results) {
-    document.body.appendChild(canvas)
-    renderer.addTexture(results.textures.paddle)
-    addSprites(renderer, 400)
-    resizeView(gl, window, world)
-    requestAnimationFrame(makeAnimate())
-    window.addEventListener("resize", function ({target}) {
-      resizeView(gl, target, world)
-    })
+function setupDocument (canvas, document, window) {
+  document.body.appendChild(canvas)
+  renderer.resize(window.innerWidth, window.innerHeight)
+  window.addEventListener("resize", function () {
+      renderer.resize(window.innerWidth, window.innerHeight)
   })
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  setupDocument(canvas, document, window)
+  startGame()
 })

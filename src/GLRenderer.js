@@ -1,11 +1,12 @@
 let {Shader, Program, Texture} = require("./gl-types")
 let {updateBuffer} = require("./gl-buffer")
 
+module.exports = GLRenderer
+
 const POINT_DIMENSION = 2
 const POINTS_PER_BOX  = 6
 const BOX_LENGTH      = POINT_DIMENSION * POINTS_PER_BOX
 
-//TODO: Should we write to multiple buffers in one go?
 function setBox (boxArray, index, x, y, w, h) {
   let i  = BOX_LENGTH * index
   let x1 = x
@@ -68,29 +69,14 @@ function TextureCoordinatesArray (count) {
   return ar
 }
 
-/*
- * Game
- *    Cache -- assets
- *    Renderer
- *    GUIRenderer?
- *    AudioSystem
- *    SceneManager
- *        [Scenes]
- *            World
- *              Entities
- *              Camera
- *
- *  PhysicsSystem.step(entities)
- *  RenderingSystem.render(world, entities)
- *  Renderer.cache(entities) //gets called on update?
- *  Renderer.render(world, entities)
- */
-
-module.exports = function GLRenderer (canvas, vSrc, fSrc, maxSpriteCount=100) {
-  let gl      = canvas.getContext("webgl")      
-  let vs      = Shader(gl, gl.VERTEX_SHADER, vSrc)
-  let fs      = Shader(gl, gl.FRAGMENT_SHADER, fSrc)
-  let program = Program(gl, vs, fs)
+function GLRenderer (canvas, vSrc, fSrc, options={}) {
+  let {maxSpriteCount, width, height} = options
+  let maxSpriteCount = maxSpriteCount || 100
+  let view           = canvas
+  let gl             = canvas.getContext("webgl")      
+  let vs             = Shader(gl, gl.VERTEX_SHADER, vSrc)
+  let fs             = Shader(gl, gl.FRAGMENT_SHADER, fSrc)
+  let program        = Program(gl, vs, fs)
 
   //index for tracking the current available position to instantiate from
   let freeIndex     = 0
@@ -129,8 +115,11 @@ module.exports = function GLRenderer (canvas, vSrc, fSrc, maxSpriteCount=100) {
   gl.colorMask(true, true, true, true)
   gl.useProgram(program)
   gl.activeTexture(gl.TEXTURE0)
-  //TODO: hardcoded for the moment for testing
-  gl.uniform2f(worldSizeLocation, 1920, 1080)
+
+  this.dimensions = {
+    width:  width || 1920, 
+    height: height || 1080
+  }
 
   //TODO: Super dirty and possibly not robust...
   this.addTexture = (image) => {
@@ -138,14 +127,25 @@ module.exports = function GLRenderer (canvas, vSrc, fSrc, maxSpriteCount=100) {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image); 
   }
 
+  //TODO: stupid.  temporary and will be removed from API
   this.addSprite = (x, y, w, h) => {
     setBox(boxes, freeIndex++, x, y, w, h)
     activeSprites++
   }
 
-  this.resize = (w, h) => gl.viewPort(0, 0, w, h)
+  this.resize = (width, height) => {
+    let ratio       = this.dimensions.width / this.dimensions.height
+    let targetRatio = width / height
+    let useWidth    = ratio >= targetRatio
+    let newWidth    = useWidth ? width : (height * ratio) 
+    let newHeight   = useWidth ? (width / ratio) : height
 
-  this.render = () => {
+    canvas.width  = newWidth 
+    canvas.height = newHeight 
+    gl.viewport(0, 0, newWidth, newHeight)
+  }
+
+  this.render = (entities) => {
     gl.clear(gl.COLOR_BUFFER_BIT)
     gl.bindTexture(gl.TEXTURE_2D, onlyTexture)
     updateBuffer(gl, boxBuffer, boxLocation, POINT_DIMENSION, boxes)
@@ -153,6 +153,8 @@ module.exports = function GLRenderer (canvas, vSrc, fSrc, maxSpriteCount=100) {
     //updateBuffer(gl, boxBuffer, boxLocation, POINT_DIMENSION, boxes)
     //updateBuffer(gl, boxBuffer, boxLocation, POINT_DIMENSION, boxes)
     updateBuffer(gl, texCoordBuffer, texCoordLocation, POINT_DIMENSION, texCoords)
+    //TODO: hardcoded for the moment for testing
+    gl.uniform2f(worldSizeLocation, 1920, 1080)
     gl.drawArrays(gl.TRIANGLES, 0, activeSprites * POINTS_PER_BOX)
   }
 }
