@@ -5,20 +5,6 @@ const POINT_DIMENSION = 2
 const POINTS_PER_BOX  = 6
 const BOX_LENGTH      = POINT_DIMENSION * POINTS_PER_BOX
 
-//TODO: temporary, should delete and update the Texture ctor found in gl-types
-function Texture2 (gl) {
-  let texture = gl.createTexture();
-
-  gl.activeTexture(gl.TEXTURE0)
-  gl.bindTexture(gl.TEXTURE_2D, texture)
-  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  return texture
-}
-
 //TODO: Should we write to multiple buffers in one go?
 function setBox (boxArray, index, x, y, w, h) {
   let i  = BOX_LENGTH * index
@@ -124,7 +110,6 @@ module.exports = function GLRenderer (canvas, vSrc, fSrc, maxSpriteCount=100) {
   let rotationBuffer = gl.createBuffer()
   let texCoordBuffer = gl.createBuffer()
 
-  //TODO: Some values are not yet used within the shader
   //GPU buffer locations
   let boxLocation      = gl.getAttribLocation(program, "a_position")
   //let centerLocation   = gl.getAttribLocation(program, "a_center")
@@ -136,7 +121,7 @@ module.exports = function GLRenderer (canvas, vSrc, fSrc, maxSpriteCount=100) {
   let worldSizeLocation = gl.getUniformLocation(program, "u_worldSize")
 
   //TODO: This is temporary for testing the single texture case
-  let onlyTexture = Texture2(gl)
+  let onlyTexture = Texture(gl)
 
   gl.enable(gl.BLEND)
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
@@ -146,8 +131,6 @@ module.exports = function GLRenderer (canvas, vSrc, fSrc, maxSpriteCount=100) {
   gl.activeTexture(gl.TEXTURE0)
   //TODO: hardcoded for the moment for testing
   gl.uniform2f(worldSizeLocation, 1920, 1080)
-  //TODO: Don't understand what this does.  commented out for now
-  //gl.uniform1i(imageLocation, 0)
 
   //TODO: Super dirty and possibly not robust...
   this.addTexture = (image) => {
@@ -155,10 +138,8 @@ module.exports = function GLRenderer (canvas, vSrc, fSrc, maxSpriteCount=100) {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image); 
   }
 
-  this.addSprite = (sprite) => {
-    setBox(boxes, freeIndex++, 800, 800, 112, 25)
-    setBox(boxes, freeIndex++, 400, 400, 112, 25)
-    activeSprites++
+  this.addSprite = (x, y, w, h) => {
+    setBox(boxes, freeIndex++, x, y, w, h)
     activeSprites++
   }
 

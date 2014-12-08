@@ -16,9 +16,11 @@ function World (width, height) {
   return world
 }
 
+const MAX_COUNT = 1000
+
 let world    = World(1920, 1080)
 let loader   = new Loader()
-let renderer = new GLRenderer(canvas, vertexSrc, fragSrc, 2)
+let renderer = new GLRenderer(canvas, vertexSrc, fragSrc, MAX_COUNT)
 let assets   = {
   textures: {
     maptiles: "/public/spritesheets/maptiles.png",
@@ -35,11 +37,24 @@ function makeAnimate () {
   }
 }
 
+function addSprites (renderer, count) {
+  let width  = 112
+  let height = 25
+  let i      = -1
+  let x, y
+
+  while (++i < count) {
+    x = Math.random() * 1920
+    y = Math.random() * 1080
+    renderer.addSprite(x, y, width, height) 
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   loader.loadAssets(assets, function (err, results) {
     document.body.appendChild(canvas)
     renderer.addTexture(results.textures.paddle)
-    renderer.addSprite()
+    addSprites(renderer, 400)
     resizeView(gl, window, world)
     requestAnimationFrame(makeAnimate())
     window.addEventListener("resize", function ({target}) {
