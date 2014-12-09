@@ -1,4 +1,5 @@
 module.exports.findWhere = findWhere
+module.exports.hasKeys   = hasKeys
 
 //:: [{}] -> String -> Maybe A
 function findWhere (key, property, arrayOfObjects) {
@@ -12,4 +13,11 @@ function findWhere (key, property, arrayOfObjects) {
     }
   }
   return found
+}
+
+function hasKeys (keys, obj) {
+  let i = -1
+  
+  while (keys[++i]) if (!obj[keys[i]]) return false
+  return true
 }

@@ -1,3 +1,5 @@
+let {hasKeys} = require("./functions")
+
 module.exports = EntityStore
 
 function EntityStore (max=1000) {
@@ -12,18 +14,15 @@ EntityStore.prototype.addEntity = function (e) {
   return id
 }
 
-EntityStore.prototype.query = function (components) {
-  let i       = -1
-  let j       = -1
-  let include = false
+EntityStore.prototype.query = function (componentNames) {
+  let i = -1
+  let entity
+
+  this.lastQuery = []
 
   while (this.entities[++i]) {
-    while (components[++j]) {
-      include = this.entities[i][components[j]] ? true : false
-    }
-    if (include) this.lastQuery.push(this.entities[i])
-    include = false
-    j       = -1
-  }
+    entity = this.entities[i]
+    if (hasKeys(componentNames, entity)) this.lastQuery.push(entity)
+   }
   return this.lastQuery
 }
