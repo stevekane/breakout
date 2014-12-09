@@ -1,9 +1,29 @@
-let {checkType, checkValueType} = require("./utils")
-let Scene = require("./Scene")
+let {findWhere} = require("./functions")
 
-//:: => {Scenes} -> SceneManager
-module.exports = function SceneManager (scenes={}) {
-  checkValueType(scenes, Scene) 
+module.exports = SceneManager
 
-  this.scenes = scenes    
+function SceneManager (scenes=[]) {
+  if (scenes.length <= 0) throw new Error("Must provide one or more scenes")
+
+  let activeSceneIndex = 0
+  let scenes           = scenes
+
+  this.activeScene = scenes[activeSceneIndex]
+
+  this.transitionTo = function (sceneName) {
+    let scene = findWhere("name", sceneName, scenes)
+
+    if (!scene) throw new Error(sceneName + " is not a valid scene name")
+
+    activeSceneIndex = scenes.indexOf(scene)
+    this.activeScene = scene
+  }
+
+  this.advance = function () {
+    let scene = scenes[activeSceneIndex + 1]
+
+    if (!scene) throw new Error("No more scenes!")
+
+    this.activeScene = scenes[++activeSceneIndex]
+  }
 }

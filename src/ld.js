@@ -13,12 +13,21 @@ let fragSrc      = document.getElementById("fragment").text
 const UPDATE_INTERVAL = 25
 const MAX_COUNT       = 1000
 
-let rendererOpts = { maxSpriteCount: MAX_COUNT }
+/*
+ * OOP techniques for modeling the major systems in the game
+ * OOP techniques for modeling the game heirarchy
+ * Data for modeling the entities/components
+ */
 
+let rendererOpts = { maxSpriteCount: MAX_COUNT }
 let cache        = new Cache(["sounds", "textures"])
 let loader       = new Loader
 let renderer     = new GLRenderer(canvas, vertexSrc, fragSrc, rendererOpts)
-let sceneManager = new SceneManager({main: new Scene})
+let sceneManager = new SceneManager([
+  new Scene("main"),
+  new Scene("menu"),
+  new Scene("level1")
+])
 let game         = new Game(cache, loader, renderer, sceneManager)
 
 window.game = game        
