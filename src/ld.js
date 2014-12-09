@@ -1,30 +1,30 @@
 let {Paddle} = require("./assemblages")
-let Loader     = require("./Loader")
-let GLRenderer = require("./GLRenderer")
-let canvas     = document.createElement("canvas")
-let vertexSrc  = document.getElementById("vertex").text
-let fragSrc    = document.getElementById("fragment").text
-
-/*
- * Game
- *    Cache
- *    Renderer
- *    GUIRenderer?
- *    AudioSystem
- *    SceneManager
- *        [Scenes]
- *            World
- *              Entities
- *              Camera
- */
+let {checkType} = require("./utils")
+let Loader       = require("./Loader")
+let GLRenderer   = require("./GLRenderer")
+let Cache        = require("./Cache")
+let SceneManager = require("./SceneManager")
+let Scene        = require("./Scene")
+let Game         = require("./Game")
+let canvas       = document.createElement("canvas")
+let vertexSrc    = document.getElementById("vertex").text
+let fragSrc      = document.getElementById("fragment").text
 
 const UPDATE_INTERVAL = 25
 const MAX_COUNT       = 1000
 
-let loader       = new Loader()
 let rendererOpts = { maxSpriteCount: MAX_COUNT }
+
+let cache        = new Cache(["sounds", "textures"])
+let loader       = new Loader
 let renderer     = new GLRenderer(canvas, vertexSrc, fragSrc, rendererOpts)
-let assets       = {
+let sceneManager = new SceneManager({main: new Scene})
+let game         = new Game(cache, loader, renderer, sceneManager)
+
+window.game = game        
+        
+//TODO: move into scene constructor or file or something...
+let assets = {
   textures: {
     maptiles: "/public/spritesheets/maptiles.png",
     paddle:   "/public/spritesheets/paddle.png"
@@ -55,10 +55,9 @@ function setupDocument (canvas, document, window) {
   document.body.appendChild(canvas)
   renderer.resize(window.innerWidth, window.innerHeight)
   window.addEventListener("resize", function () {
-      renderer.resize(window.innerWidth, window.innerHeight)
+    renderer.resize(window.innerWidth, window.innerHeight)
   })
 }
-
 
 document.addEventListener("DOMContentLoaded", function () {
   setupDocument(canvas, document, window)
