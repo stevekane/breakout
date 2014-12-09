@@ -7,6 +7,10 @@ function Scene (name) {
   this.game = null
 }
 
-Scene.prototype.initialize = function (game) {
-  this.game = game
+Scene.prototype.setup = function (game, cb) {
+  cb(null, null)  
+}
+
+Scene.prototype.update = function (game) {
+  console.log("updating wow, really impressive")  
 }

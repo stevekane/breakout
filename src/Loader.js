@@ -40,9 +40,9 @@ function Loader () {
   }
 
   this.loadAssets = ({sounds, textures, shaders}, cb) => {
-    let soundKeys    = Object.keys(sounds)
-    let textureKeys  = Object.keys(textures)
-    let shaderKeys   = Object.keys(shaders)
+    let soundKeys    = Object.keys(sounds || {})
+    let textureKeys  = Object.keys(textures || {})
+    let shaderKeys   = Object.keys(shaders || {})
     let soundCount   = soundKeys.length
     let textureCount = textureKeys.length
     let shaderCount  = shaderKeys.length
