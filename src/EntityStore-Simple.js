@@ -23,6 +23,6 @@ EntityStore.prototype.query = function (componentNames) {
   while (this.entities[++i]) {
     entity = this.entities[i]
     if (hasKeys(componentNames, entity)) this.lastQuery.push(entity)
-   }
+  }
   return this.lastQuery
 }

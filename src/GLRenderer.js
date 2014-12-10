@@ -143,6 +143,12 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
     gl.viewport(0, 0, newWidth, newHeight)
   }
 
+  this.addSprite = () => {}
+
+  //THINK OF NAME?
+  //this.reset = 
+  //this.flush
+
   this.render = (entities) => {
     //reset these values on every call?
     freeIndex     = 0

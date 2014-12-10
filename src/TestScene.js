@@ -1,10 +1,13 @@
 let {Paddle} = require("./assemblages")
-let Scene = require("./Scene")
+let RenderingSystem = require("./RenderingSystem")
+let Scene           = require("./Scene")
 
 module.exports = TestScene
 
 function TestScene () {
-  Scene.call(this, "test")
+  let systems = [new RenderingSystem]
+
+  Scene.call(this, "test", systems)
 }
 
 TestScene.prototype = Object.create(Scene.prototype)

@@ -1,14 +1,14 @@
-let Loader       = require("./Loader")
-let GLRenderer   = require("./GLRenderer")
-let EntityStore  = require("./EntityStore-Simple")
-let Cache        = require("./Cache")
-let SceneManager = require("./SceneManager")
-let Scene        = require("./Scene")
-let TestScene    = require("./TestScene")
-let Game         = require("./Game")
-let canvas       = document.createElement("canvas")
-let vertexSrc    = document.getElementById("vertex").text
-let fragSrc      = document.getElementById("fragment").text
+let Loader          = require("./Loader")
+let GLRenderer      = require("./GLRenderer")
+let EntityStore     = require("./EntityStore-Simple")
+let Cache           = require("./Cache")
+let SceneManager    = require("./SceneManager")
+let Scene           = require("./Scene")
+let TestScene       = require("./TestScene")
+let Game            = require("./Game")
+let canvas          = document.createElement("canvas")
+let vertexSrc       = document.getElementById("vertex").text
+let fragSrc         = document.getElementById("fragment").text
 
 const UPDATE_INTERVAL = 25
 const MAX_COUNT       = 1000
@@ -23,7 +23,6 @@ let game         = new Game(cache, loader, renderer, entityStore, sceneManager)
 
 function makeUpdate (game) {
   return function update () {
-    //TODO: this?  hrmm
     game.sceneManager.activeScene.update()
   }
 }
@@ -55,4 +54,5 @@ document.addEventListener("DOMContentLoaded", function () {
   setupDocument(canvas, document, window)
   game.start()
   requestAnimationFrame(makeAnimate(game))
+  setInterval(makeUpdate(game), UPDATE_INTERVAL)
 })
