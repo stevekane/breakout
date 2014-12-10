@@ -108,6 +108,7 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
 
   //TODO: This is temporary for testing the single texture case
   let onlyTexture = Texture(gl)
+  let loaded      = false
 
   gl.enable(gl.BLEND)
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
@@ -121,16 +122,13 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
     height: height || 1080
   }
 
-  //TODO: Super dirty and possibly not robust...
+  //TODO: This should not be public api.  entities contain references
+  //to their image which should be Weakmap stored with a texture and used
   this.addTexture = (image) => {
+    //TODO: Temporary yucky thing
+    loaded = true
     gl.bindTexture(gl.TEXTURE_2D, onlyTexture)
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image); 
-  }
-
-  //TODO: stupid.  temporary and will be removed from API
-  this.addSprite = (x, y, w, h) => {
-    setBox(boxes, freeIndex++, x, y, w, h)
-    activeSprites++
   }
 
   this.resize = (width, height) => {
@@ -146,12 +144,32 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
   }
 
   this.render = (entities) => {
+    //reset these values on every call?
+    freeIndex     = 0
+    activeSprites = 0
+    window.boxes = boxes
+
+    if (!loaded && entities[0]) this.addTexture(entities[0].renderable.image)
+
+    //TODO: initial version of this loop uses commonly shared paddle texture
+    for (var i = 0; i < entities.length; ++i) {
+      setBox(
+        boxes, 
+        freeIndex++, 
+        entities[i].physics.x, 
+        entities[i].physics.y, 
+        entities[i].renderable.width,
+        entities[i].renderable.height
+      )
+      activeSprites++
+    }
+
     gl.clear(gl.COLOR_BUFFER_BIT)
     gl.bindTexture(gl.TEXTURE_2D, onlyTexture)
     updateBuffer(gl, boxBuffer, boxLocation, POINT_DIMENSION, boxes)
-    //updateBuffer(gl, boxBuffer, boxLocation, POINT_DIMENSION, boxes)
-    //updateBuffer(gl, boxBuffer, boxLocation, POINT_DIMENSION, boxes)
-    //updateBuffer(gl, boxBuffer, boxLocation, POINT_DIMENSION, boxes)
+    //updateBuffer(gl, centerBuffer, centerLocation, POINT_DIMENSION, centers)
+    //updateBuffer(gl, scaleBuffer, scaleLocation, POINT_DIMENSION, scales)
+    //updateBuffer(gl, rotationBuffer, rotLocation, 1, rotations)
     updateBuffer(gl, texCoordBuffer, texCoordLocation, POINT_DIMENSION, texCoords)
     //TODO: hardcoded for the moment for testing
     gl.uniform2f(worldSizeLocation, 1920, 1080)

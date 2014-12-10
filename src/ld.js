@@ -1,10 +1,10 @@
-let {Paddle} = require("./assemblages")
-let {checkType} = require("./utils")
 let Loader       = require("./Loader")
 let GLRenderer   = require("./GLRenderer")
+let EntityStore  = require("./EntityStore-Simple")
 let Cache        = require("./Cache")
 let SceneManager = require("./SceneManager")
 let Scene        = require("./Scene")
+let TestScene    = require("./TestScene")
 let Game         = require("./Game")
 let canvas       = document.createElement("canvas")
 let vertexSrc    = document.getElementById("vertex").text
@@ -13,52 +13,35 @@ let fragSrc      = document.getElementById("fragment").text
 const UPDATE_INTERVAL = 25
 const MAX_COUNT       = 1000
 
-/*
- * OOP techniques for modeling the major systems in the game
- * OOP techniques for modeling the game heirarchy
- * Data for modeling the entities/components
- */
-
 let rendererOpts = { maxSpriteCount: MAX_COUNT }
+let entityStore  = new EntityStore
 let cache        = new Cache(["sounds", "textures"])
 let loader       = new Loader
 let renderer     = new GLRenderer(canvas, vertexSrc, fragSrc, rendererOpts)
-let sceneManager = new SceneManager([
-  new Scene("main"),
-  new Scene("menu"),
-  new Scene("level1")
-])
-let game         = new Game(cache, loader, renderer, sceneManager)
+let sceneManager = new SceneManager([new TestScene])
+let game         = new Game(cache, loader, renderer, entityStore, sceneManager)
 
-window.game = game        
-        
-//TODO: move into scene constructor or file or something...
-let assets = {
-  textures: {
-    maptiles: "/public/spritesheets/maptiles.png",
-    paddle:   "/public/spritesheets/paddle.png"
-  },
-  sounds:  {},
-  shaders: {} 
+function makeUpdate (game) {
+  return function update () {
+    //TODO: this?  hrmm
+    game.sceneManager.activeScene.update()
+  }
 }
 
-function makeUpdate () {
-  return function update () {}
-}
+function makeAnimate (game) {
+  let store          = game.entityStore
+  let r              = game.renderer
+  let componentNames = ["renderable", "physics"]
 
-function makeAnimate () {
   return function animate () {
-    renderer.render()
+    let renderables = store.query(componentNames)
+
+    r.render(renderables)
     requestAnimationFrame(animate)  
   }
 }
 
-function startGame () {
-  loader.loadAssets(assets, function (err, results) {
-    setInterval(makeUpdate(), UPDATE_INTERVAL)
-    requestAnimationFrame(makeAnimate())
-  })
-}
+window.game = game
 
 function setupDocument (canvas, document, window) {
   document.body.appendChild(canvas)
@@ -70,5 +53,6 @@ function setupDocument (canvas, document, window) {
 
 document.addEventListener("DOMContentLoaded", function () {
   setupDocument(canvas, document, window)
-  startGame()
+  game.start()
+  requestAnimationFrame(makeAnimate(game))
 })

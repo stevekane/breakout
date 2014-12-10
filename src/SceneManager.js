@@ -8,6 +8,7 @@ function SceneManager (scenes=[]) {
   let activeSceneIndex = 0
   let scenes           = scenes
 
+  this.scenes      = scenes
   this.activeScene = scenes[activeSceneIndex]
 
   this.transitionTo = function (sceneName) {

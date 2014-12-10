@@ -30,4 +30,5 @@ function Physics (e, width, height, x, y) {
     ddx: 0, 
     ddy: 0
   }
+  return e
 }
