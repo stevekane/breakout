@@ -21,13 +21,22 @@ let renderer     = new GLRenderer(canvas, vertexSrc, fragSrc, rendererOpts)
 let sceneManager = new SceneManager([new TestScene])
 let game         = new Game(cache, loader, renderer, entityStore, sceneManager)
 
-function makeUpdate () {
-  return function update () {}
+function makeUpdate (game) {
+  return function update () {
+    //TODO: this?  hrmm
+    game.sceneManager.activeScene.update()
+  }
 }
 
-function makeAnimate () {
+function makeAnimate (game) {
+  let store          = game.entityStore
+  let r              = game.renderer
+  let componentNames = ["renderable", "physics"]
+
   return function animate () {
-    renderer.render()
+    let renderables = store.query(componentNames)
+
+    r.render(renderables)
     requestAnimationFrame(animate)  
   }
 }
@@ -45,4 +54,5 @@ function setupDocument (canvas, document, window) {
 document.addEventListener("DOMContentLoaded", function () {
   setupDocument(canvas, document, window)
   game.start()
+  requestAnimationFrame(makeAnimate(game))
 })
