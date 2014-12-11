@@ -21,10 +21,19 @@ function InputManager (document) {
   let downQueue     = []
   let justDownQueue = []
   let justUpQueue   = []
-  //let queue         = new Int8Array(QUEUE_LENGTH *STATE_LENGTH)
   let states        = new Int8Array(KEY_COUNT * STATE_LENGTH)
-  let handleKeyDown = ({keyCode}) => setState(states, keyCode, 1, 1, 0)
-  let handleKeyUp   = ({keyCode}) => setState(states, keyCode, 0, 0, 1)
+  
+  let handleKeyDown = ({keyCode}) => {
+    let alreadyDown = isDown(states, keyCode)
+
+    setDown(states, keyCode, 1)
+    setJustDown(states, keyCode, 1)
+  }
+
+  let handleKeyUp = ({keyCode}) => {
+    setDown(states, keyCode, 0)
+    setJustUp(states, keyCode, 1)
+  }
 
   this.states        = states
   this.downQueue     = downQueue
@@ -40,14 +49,11 @@ InputManager.prototype.tick = function (dT) {
   this.justDownQueue = []
   this.justUpQueue   = []
 
-  for (var i = 0, len = this.states.length; i < len; i += STATE_LENGTH) {
+  for (var i = 0, len = this.states.length; i < len; ++i) {
     if (isDown(this.states, i))   this.downQueue.push(i)
     if (justDown(this.states, i)) this.justDownQueue.push(i)
     if (justUp(this.states, i))   this.justUpQueue.push(i)
     setJustDown(this.states, i, 0)
     setJustUp(this.states, i, 0)
   }    
-  console.log(this.downQueue)
-  console.log(this.justDownQueue)
-  console.log(this.justUpQueue)
 }

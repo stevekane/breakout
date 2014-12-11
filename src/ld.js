@@ -16,7 +16,6 @@ let im = new InputManager(document)
 
 window.im = im
 
-
 const UPDATE_INTERVAL = 25
 const MAX_COUNT       = 1000
 
@@ -30,7 +29,7 @@ let game         = new Game(cache, loader, renderer, entityStore, sceneManager)
 
 function makeUpdate (game) {
   return function update () {
-    //TODO: this?  hrmm
+    im.tick()
     game.sceneManager.activeScene.update()
   }
 }
@@ -62,4 +61,5 @@ document.addEventListener("DOMContentLoaded", function () {
   setupDocument(canvas, document, window)
   game.start()
   requestAnimationFrame(makeAnimate(game))
+  setInterval(makeUpdate(game), UPDATE_INTERVAL)
 })

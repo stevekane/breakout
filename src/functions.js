@@ -7,9 +7,10 @@ function findWhere (key, property, arrayOfObjects) {
   let i     = -1
   let found = null
 
-  while ( ++i < len && !found) {
+  while ( ++i < len ) {
     if (arrayOfObjects[i][key] === property) {
       found = arrayOfObjects[i]
+      break
     }
   }
   return found
