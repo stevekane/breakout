@@ -30,6 +30,8 @@ let game         = new Game(cache, loader, renderer, entityStore, sceneManager)
 function makeUpdate (game) {
   return function update () {
     im.tick()
+    //console.log(im.eventQueue)
+    im.flush()
     game.sceneManager.activeScene.update()
   }
 }
