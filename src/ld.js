@@ -6,9 +6,16 @@ let SceneManager = require("./SceneManager")
 let Scene        = require("./Scene")
 let TestScene    = require("./TestScene")
 let Game         = require("./Game")
+let InputManager = require("./InputManager")
 let canvas       = document.createElement("canvas")
 let vertexSrc    = document.getElementById("vertex").text
 let fragSrc      = document.getElementById("fragment").text
+
+//TESTING FOR INPUT MANAGER
+let im = new InputManager(document)
+
+window.im = im
+
 
 const UPDATE_INTERVAL = 25
 const MAX_COUNT       = 1000
