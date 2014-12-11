@@ -7,10 +7,6 @@ const KEYDOWN      = 0
 const JUSTDOWN     = 1
 const JUSTUP       = 2
 
-//[up/down, justDown, justUp]
-let isDown  = (states, keyCode) => states[keyCode]
-let setDown = (states, keyCode, val) => states[keyCode] = val
-
 function EventQueue () {
   let queue = new Int8Array(QUEUE_LENGTH * EVENT_SIZE)
 
@@ -30,13 +26,20 @@ function InputManager (document) {
   let states     = new Int8Array(KEY_COUNT)
   
   let handleKeyDown = ({keyCode}) => {
-    if (!isDown(states, keyCode)) queueEvent(eventQueue, keyCode, JUSTDOWN)
-    setDown(states, keyCode, 1)
+    if (!states[keyCode]) queueEvent(eventQueue, keyCode, JUSTDOWN)
+    states[keyCode] = 1
   }
 
   let handleKeyUp = ({keyCode}) => {
-    setDown(states, keyCode, 0)
     queueEvent(eventQueue, keyCode, JUSTUP)
+    states[keyCode] = 0
+  }
+
+  let handleBlur = () => {
+    let i   = -1
+    let len = states.length
+
+    while (++i < KEY_COUNT) states[i] = 0
   }
 
   Object.defineProperty(this, "eventQueue", {
@@ -59,4 +62,5 @@ function InputManager (document) {
 
   document.addEventListener("keydown", handleKeyDown)
   document.addEventListener("keyup", handleKeyUp)
+  document.addEventListener("blur", handleBlur)
 }
