@@ -2,7 +2,7 @@ module.exports = InputManager
 
 const EVENT_SIZE   = 2
 const KEY_COUNT    = 256
-const QUEUE_LENGTH = 10
+const QUEUE_LENGTH = 20
 const KEYDOWN      = 0
 const JUSTDOWN     = 1
 const JUSTUP       = 2
@@ -47,9 +47,10 @@ function InputManager (document) {
   })
 
   this.tick = (dT) => {
-    for (var i = 0, len = states.length; i < len; ++i) {
-      if (isDown(states, i)) queueEvent(eventQueue, i, KEYDOWN)
-    }    
+    let i   = -1
+    let len = states.length
+
+    while (++i < len) if (states[i]) queueEvent(eventQueue, i, KEYDOWN)
   }
 
   this.flush = () => {
