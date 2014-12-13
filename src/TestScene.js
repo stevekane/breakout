@@ -13,9 +13,11 @@ function TestScene () {
 TestScene.prototype = Object.create(Scene.prototype)
 
 TestScene.prototype.setup = function (cb) {
-  let {cache, loader, entityStore} = this.game 
+  let {cache, loader, entityStore, audioSystem} = this.game 
+  let {bg} = audioSystem.channels
   let assets = {
-    textures: { paddle: "/public/spritesheets/paddle.png" },
+    sounds: { bgMusic: "/public/sounds/bgm1.mp3" },
+    textures: { paddle: "/public/spritesheets/paddle.png" }
   }
 
   loader.loadAssets(assets, function (err, loadedAssets) {
@@ -24,6 +26,8 @@ TestScene.prototype.setup = function (cb) {
     cache.sounds   = sounds
     cache.textures = textures
     entityStore.addEntity(new Paddle(textures.paddle, 112, 25, 400, 400))
+    bg.volume = .1
+    bg.loop(cache.sounds.bgMusic)
     cb(null)
   })
 }
