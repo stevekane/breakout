@@ -1,20 +1,20 @@
-let Loader       = require("./Loader")
-let GLRenderer   = require("./GLRenderer")
-let EntityStore  = require("./EntityStore-Simple")
-let Cache        = require("./Cache")
-let SceneManager = require("./SceneManager")
-let Scene        = require("./Scene")
-let TestScene    = require("./TestScene")
-let Game         = require("./Game")
-let InputManager = require("./InputManager")
-let canvas       = document.createElement("canvas")
-let vertexSrc    = document.getElementById("vertex").text
-let fragSrc      = document.getElementById("fragment").text
+let Loader          = require("./Loader")
+let GLRenderer      = require("./GLRenderer")
+let EntityStore     = require("./EntityStore-Simple")
+let Cache           = require("./Cache")
+let SceneManager    = require("./SceneManager")
+let Scene           = require("./Scene")
+let TestScene       = require("./TestScene")
+let Game            = require("./Game")
+let KeyboardManager = require("./KeyboardManager")
+let canvas          = document.createElement("canvas")
+let vertexSrc       = document.getElementById("vertex").text
+let fragSrc         = document.getElementById("fragment").text
 
 //TESTING FOR INPUT MANAGER
-let im = new InputManager(document)
+let kbManager = new KeyboardManager(document)
 
-window.im = im
+window.kbManager = kbManager
 
 const UPDATE_INTERVAL = 25
 const MAX_COUNT       = 1000
@@ -28,12 +28,23 @@ let sceneManager = new SceneManager([new TestScene])
 let game         = new Game(cache, loader, renderer, entityStore, sceneManager)
 
 function makeUpdate (game) {
+  let store   = game.entityStore
+  let newTime = Date.now()
+  let oldTime = newTime
+  let dT      = newTime - oldTime
+  let componentNames = ["renderable", "physics"]
+
   return function update () {
-    im.tick()
-    //we can now inspect states directly or read the queue
-    //console.log(im.justDown(37))
-    //console.log(im.eventQueue)
-    im.flush()
+    let moveSpeed = 1
+    let paddle    = store.query(componentNames)[0]
+
+    oldTime = newTime
+    newTime = Date.now()
+    dT      = newTime - oldTime
+
+    if (kbManager.isDowns[37]) paddle.physics.x -= dT * moveSpeed
+    if (kbManager.isDowns[39]) paddle.physics.x += dT * moveSpeed
+    kbManager.tick(dT)
     game.sceneManager.activeScene.update()
   }
 }
