@@ -16,7 +16,6 @@ TestScene.prototype.setup = function (cb) {
   let {cache, loader, entityStore, audioSystem} = this.game 
   let {bg} = audioSystem.channels
   let assets = {
-    sounds: { bgMusic: "/public/sounds/bgm1.mp3" },
     textures: { paddle: "/public/spritesheets/paddle.png" }
   }
 
@@ -26,8 +25,9 @@ TestScene.prototype.setup = function (cb) {
     cache.sounds   = sounds
     cache.textures = textures
     entityStore.addEntity(new Paddle(textures.paddle, 112, 25, 400, 400))
-    bg.volume = .1
-    bg.loop(cache.sounds.bgMusic)
+    entityStore.addEntity(new Paddle(textures.paddle, 112, 25, 800, 800))
+    //bg.volume = 0
+    //bg.loop(cache.sounds.bgMusic)
     cb(null)
   })
 }

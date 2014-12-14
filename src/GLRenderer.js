@@ -143,21 +143,8 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
     gl.viewport(0, 0, newWidth, newHeight)
   }
 
-  this.addSprite = () => {}
-
-  //THINK OF NAME?
-  //this.reset = 
-  //this.flush
-
-  this.render = (entities) => {
-    //reset these values on every call?
-    freeIndex     = 0
-    activeSprites = 0
-    window.boxes = boxes
-
+  this.addEntities = (entities) => {
     if (!loaded && entities[0]) this.addTexture(entities[0].renderable.image)
-
-    //TODO: initial version of this loop uses commonly shared paddle texture
     for (var i = 0; i < entities.length; ++i) {
       setBox(
         boxes, 
@@ -169,7 +156,14 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
       )
       activeSprites++
     }
+  }
 
+  this.flush = () => {
+    freeIndex     = 0
+    activeSprites = 0
+  }
+
+  this.render = () => {
     gl.clear(gl.COLOR_BUFFER_BIT)
     gl.bindTexture(gl.TEXTURE_2D, onlyTexture)
     updateBuffer(gl, boxBuffer, boxLocation, POINT_DIMENSION, boxes)

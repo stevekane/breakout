@@ -4,6 +4,7 @@ function System (componentNames=[]) {
   this.componentNames = componentNames
 }
 
-System.prototype.run = function (entities) {
+//scene.game.clock
+System.prototype.run = function (scene, entities) {
   //does something w/ the list of entities passed to it
 }

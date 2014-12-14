@@ -1,6 +1,7 @@
 let Loader          = require("./Loader")
 let GLRenderer      = require("./GLRenderer")
 let EntityStore     = require("./EntityStore-Simple")
+let Clock           = require("./Clock")
 let Cache           = require("./Cache")
 let SceneManager    = require("./SceneManager")
 let Scene           = require("./Scene")
@@ -22,44 +23,35 @@ const MAX_COUNT       = 1000
 
 let rendererOpts = { maxSpriteCount: MAX_COUNT }
 let entityStore  = new EntityStore
+let clock        = new Clock(Date.now)
 let cache        = new Cache(["sounds", "textures"])
 let loader       = new Loader
 let renderer     = new GLRenderer(canvas, vertexSrc, fragSrc, rendererOpts)
 let audioSystem  = new AudioSystem(["main", "bg"])
 let sceneManager = new SceneManager([new TestScene])
-let game         = new Game(cache, loader, renderer, audioSystem, entityStore, sceneManager)
+let game         = new Game(clock, cache, loader, renderer, audioSystem, entityStore, sceneManager)
 
 function makeUpdate (game) {
-  let store   = game.entityStore
-  let newTime = Date.now()
-  let oldTime = newTime
-  let dT      = newTime - oldTime
+  let store = game.entityStore
+  let clock = game.clock
   let componentNames = ["renderable", "physics"]
 
   return function update () {
-    let moveSpeed = 1
-    let paddle    = store.query(componentNames)[0]
+    //let moveSpeed = 1
+    //let paddle    = store.query(componentNames)[0]
 
-    oldTime = newTime
-    newTime = Date.now()
-    dT      = newTime - oldTime
+    clock.tick()
+    game.sceneManager.activeScene.update(clock.dT)
 
-    if (kbManager.isDowns[37]) paddle.physics.x -= dT * moveSpeed
-    if (kbManager.isDowns[39]) paddle.physics.x += dT * moveSpeed
-    kbManager.tick(dT)
-    game.sceneManager.activeScene.update()
+    //if (kbManager.isDowns[37]) paddle.physics.x -= clock.dT * moveSpeed
+    //if (kbManager.isDowns[39]) paddle.physics.x += clock.dT * moveSpeed
+    //kbManager.tick(clock.dT)
   }
 }
 
 function makeAnimate (game) {
-  let store          = game.entityStore
-  let r              = game.renderer
-  let componentNames = ["renderable", "physics"]
-
   return function animate () {
-    let renderables = store.query(componentNames)
-
-    r.render(renderables)
+    game.renderer.render()
     requestAnimationFrame(animate)  
   }
 }

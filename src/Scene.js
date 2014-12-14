@@ -24,7 +24,7 @@ Scene.prototype.setup = function (cb) {
   cb(null, null)  
 }
 
-Scene.prototype.update = function () {
+Scene.prototype.update = function (dT) {
   let store = this.game.entityStore
   let len   = this.systems.length
   let i     = -1
@@ -32,6 +32,6 @@ Scene.prototype.update = function () {
 
   while (++i < len) {
     system = this.systems[i] 
-    system.run(store.query(system.componentNames))
+    system.run(this, store.query(system.componentNames))
   }
 }
