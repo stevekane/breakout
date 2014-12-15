@@ -149,28 +149,30 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
 
     setBox(batch.boxes, batch.count, w, h, x, y)
     //TODO: We should set the texcoords for this sprite as well
-    batch.count+=
+    batch.count++
+  }
+
+  let resetBatch = (batch) => batch.count = 0
+
+  let drawBatch = (batch, texture) => {
+    gl.bindTexture(gl.TEXTURE_2D, texture)
+    updateBuffer(gl, boxBuffer, boxLocation, POINT_DIMENSION, batch.boxes)
+    //updateBuffer(gl, centerBuffer, centerLocation, POINT_DIMENSION, centers)
+    //updateBuffer(gl, scaleBuffer, scaleLocation, POINT_DIMENSION, scales)
+    //updateBuffer(gl, rotationBuffer, rotLocation, 1, rotations)
+    updateBuffer(gl, texCoordBuffer, texCoordLocation, POINT_DIMENSION, batch.texCoords)
+    gl.drawArrays(gl.TRIANGLES, 0, batch.count * POINTS_PER_BOX)
+    
   }
 
   this.flush = () => {
-    textureToBatchMap.forEach(function (batch, texture) {
-      batch.count = 0 
-    })
+    textureToBatchMap.forEach(resetBatch)
   }
 
   this.render = () => {
     gl.clear(gl.COLOR_BUFFER_BIT)
     //TODO: hardcoded for the moment for testing
     gl.uniform2f(worldSizeLocation, 1920, 1080)
-
-    textureToBatchMap.forEach(function (batch, texture) {
-      gl.bindTexture(gl.TEXTURE_2D, texture)
-      updateBuffer(gl, boxBuffer, boxLocation, POINT_DIMENSION, batch.boxes)
-      //updateBuffer(gl, centerBuffer, centerLocation, POINT_DIMENSION, centers)
-      //updateBuffer(gl, scaleBuffer, scaleLocation, POINT_DIMENSION, scales)
-      //updateBuffer(gl, rotationBuffer, rotLocation, 1, rotations)
-      updateBuffer(gl, texCoordBuffer, texCoordLocation, POINT_DIMENSION, batch.texCoords)
-      gl.drawArrays(gl.TRIANGLES, 0, batch.count * POINTS_PER_BOX)
-    })
+    textureToBatchMap.forEach(drawBatch)
   }
 }
