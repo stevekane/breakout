@@ -1,4 +1,5 @@
 let {checkType} = require("./utils")
+let InputManager = require("./InputManager")
 let Clock        = require("./Clock")
 let Loader       = require("./Loader")
 let GLRenderer   = require("./GLRenderer")
@@ -10,10 +11,11 @@ let SceneManager = require("./SceneManager")
 module.exports = Game
 
 //:: Clock -> Cache -> Loader -> GLRenderer -> AudioSystem -> EntityStore -> SceneManager
-function Game (clock, cache, loader, renderer, audioSystem, 
+function Game (clock, cache, loader, inputManager, renderer, audioSystem, 
                entityStore, sceneManager) {
   checkType(clock, Clock)
   checkType(cache, Cache)
+  checkType(inputManager, InputManager)
   checkType(loader, Loader)
   checkType(renderer, GLRenderer)
   checkType(audioSystem, AudioSystem)
@@ -23,6 +25,7 @@ function Game (clock, cache, loader, renderer, audioSystem,
   this.clock        = clock
   this.cache        = cache 
   this.loader       = loader
+  this.inputManager = inputManager
   this.renderer     = renderer
   this.audioSystem  = audioSystem
   this.entityStore  = entityStore

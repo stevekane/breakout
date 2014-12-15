@@ -1,5 +1,6 @@
-module.exports.Renderable = Renderable
-module.exports.Physics    = Physics
+module.exports.Renderable       = Renderable
+module.exports.Physics          = Physics
+module.exports.PlayerControlled = PlayerControlled
 
 function Renderable (e, image, width, height) {
   e.renderable = {
@@ -31,4 +32,8 @@ function Physics (e, width, height, x, y) {
     ddy: 0
   }
   return e
+}
+
+function PlayerControlled (e) {
+  e.playerControlled = true
 }
