@@ -78,17 +78,6 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
   let fs             = Shader(gl, gl.FRAGMENT_SHADER, fSrc)
   let program        = Program(gl, vs, fs)
 
-  //index for tracking the current available position to instantiate from
-  let freeIndex     = 0
-  let activeSprites = 0
-
-  //views over cpu buffers for data
-  let boxes     = BoxArray(maxSpriteCount)
-  let centers   = CenterArray(maxSpriteCount)
-  let scales    = ScaleArray(maxSpriteCount)
-  let rotations = RotationArray(maxSpriteCount)
-  let texCoords = TextureCoordinatesArray(maxSpriteCount)
-
   //handles to GPU buffers
   let boxBuffer      = gl.createBuffer()
   let centerBuffer   = gl.createBuffer()
@@ -106,9 +95,8 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
   //Uniform locations
   let worldSizeLocation = gl.getUniformLocation(program, "u_worldSize")
 
-  //TODO: This is temporary for testing the single texture case
-  let onlyTexture = Texture(gl)
-  let loaded      = false
+  let imageToTextureMap = new Map()
+  let textureToBatchMap = new Map()
 
   gl.enable(gl.BLEND)
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
@@ -122,14 +110,25 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
     height: height || 1080
   }
 
-  //TODO: This should not be public api.  entities contain references
-  //to their image which should be Weakmap stored with a texture and used
+  this.addBatch = (texture) => {
+    textureToBatchMap.set(texture, {
+      count:     0,
+      boxes:     BoxArray(maxSpriteCount),
+      centers:   CenterArray(maxSpriteCount),
+      scales:    ScaleArray(maxSpriteCount),
+      rotations: RotationArray(maxSpriteCount),
+      texCoords: TextureCoordinatesArray(maxSpriteCount)
+    }) 
+    return textureToBatchMap.get(texture)
+  }
+
   this.addTexture = (image) => {
-    //TODO: We are temporarily using a single texture.  should change!
-    loaded = true
-    gl.bindTexture(gl.TEXTURE_2D, onlyTexture)
+    let texture = Texture(gl)
+
+    imageToTextureMap.set(image, texture)
+    gl.bindTexture(gl.TEXTURE_2D, texture)
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image); 
-    return onlyTexture
+    return texture
   }
 
   this.resize = (width, height) => {
@@ -145,27 +144,33 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
   }
 
   this.addSprite = (image, w, h, x, y, tw, th, tx, ty) => {
-    //TODO: temporary hard coded single sprite
-    if (!loaded) this.addTexture(image)
-    setBox(boxes, freeIndex++, w, h, x, y)
-    activeSprites++
+    let tx    = imageToTextureMap.get(image) || this.addTexture(image)
+    let batch = textureToBatchMap.get(tx) || this.addBatch(tx)
+
+    setBox(batch.boxes, batch.count, w, h, x, y)
+    //TODO: We should set the texcoords for this sprite as well
+    batch.count+=
   }
 
   this.flush = () => {
-    freeIndex     = 0
-    activeSprites = 0
+    textureToBatchMap.forEach(function (batch, texture) {
+      batch.count = 0 
+    })
   }
 
   this.render = () => {
     gl.clear(gl.COLOR_BUFFER_BIT)
-    gl.bindTexture(gl.TEXTURE_2D, onlyTexture)
-    updateBuffer(gl, boxBuffer, boxLocation, POINT_DIMENSION, boxes)
-    //updateBuffer(gl, centerBuffer, centerLocation, POINT_DIMENSION, centers)
-    //updateBuffer(gl, scaleBuffer, scaleLocation, POINT_DIMENSION, scales)
-    //updateBuffer(gl, rotationBuffer, rotLocation, 1, rotations)
-    updateBuffer(gl, texCoordBuffer, texCoordLocation, POINT_DIMENSION, texCoords)
     //TODO: hardcoded for the moment for testing
     gl.uniform2f(worldSizeLocation, 1920, 1080)
-    gl.drawArrays(gl.TRIANGLES, 0, activeSprites * POINTS_PER_BOX)
+
+    textureToBatchMap.forEach(function (batch, texture) {
+      gl.bindTexture(gl.TEXTURE_2D, texture)
+      updateBuffer(gl, boxBuffer, boxLocation, POINT_DIMENSION, batch.boxes)
+      //updateBuffer(gl, centerBuffer, centerLocation, POINT_DIMENSION, centers)
+      //updateBuffer(gl, scaleBuffer, scaleLocation, POINT_DIMENSION, scales)
+      //updateBuffer(gl, rotationBuffer, rotLocation, 1, rotations)
+      updateBuffer(gl, texCoordBuffer, texCoordLocation, POINT_DIMENSION, batch.texCoords)
+      gl.drawArrays(gl.TRIANGLES, 0, batch.count * POINTS_PER_BOX)
+    })
   }
 }
