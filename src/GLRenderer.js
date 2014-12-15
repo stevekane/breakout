@@ -144,21 +144,6 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
     gl.viewport(0, 0, newWidth, newHeight)
   }
 
-  this.addEntities = (entities) => {
-    if (!loaded && entities[0]) this.addTexture(entities[0].renderable.image)
-    for (var i = 0; i < entities.length; ++i) {
-      setBox(
-        boxes, 
-        freeIndex++, 
-        entities[i].renderable.width,
-        entities[i].renderable.height,
-        entities[i].physics.x, 
-        entities[i].physics.y
-      )
-      activeSprites++
-    }
-  }
-
   this.addSprite = (image, w, h, x, y, tw, th, tx, ty) => {
     //TODO: temporary hard coded single sprite
     if (!loaded) this.addTexture(image)
