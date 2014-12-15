@@ -4,7 +4,6 @@ let EntityStore     = require("./EntityStore-Simple")
 let Clock           = require("./Clock")
 let Cache           = require("./Cache")
 let SceneManager    = require("./SceneManager")
-let Scene           = require("./Scene")
 let TestScene       = require("./TestScene")
 let Game            = require("./Game")
 let InputManager    = require("./InputManager")
@@ -27,7 +26,7 @@ let loader          = new Loader
 let renderer        = new GLRenderer(canvas, vertexSrc, fragSrc, rendererOpts)
 let audioSystem     = new AudioSystem(["main", "bg"])
 let sceneManager    = new SceneManager([new TestScene])
-let game            = new Game(clock, cache, loader, inputManager, 
+let game            = new Game(clock, cache, loader, inputManager,
                                renderer, audioSystem, entityStore, 
                                sceneManager)
 

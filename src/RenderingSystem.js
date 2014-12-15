@@ -8,7 +8,24 @@ function RenderingSystem () {
 
 RenderingSystem.prototype.run = function (scene, entities) {
   let {renderer} = scene.game
+  let len = entities.length
+  let i   = -1
+  let ent
 
   renderer.flush()
-  renderer.addEntities(entities)
+
+  while (++i < len) {
+    ent = entities[i]
+    renderer.addSprite(
+      ent.renderable.image, //image
+      ent.physics.width,
+      ent.physics.height,
+      ent.physics.x,
+      ent.physics.y,
+      1,  //texture width
+      1,  //texture height
+      0,  //texture x
+      0   //texture y
+    )
+  }
 }

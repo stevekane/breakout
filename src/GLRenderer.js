@@ -7,7 +7,7 @@ const POINT_DIMENSION = 2
 const POINTS_PER_BOX  = 6
 const BOX_LENGTH      = POINT_DIMENSION * POINTS_PER_BOX
 
-function setBox (boxArray, index, x, y, w, h) {
+function setBox (boxArray, index, w, h, x, y) {
   let i  = BOX_LENGTH * index
   let x1 = x
   let y1 = y 
@@ -125,10 +125,11 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
   //TODO: This should not be public api.  entities contain references
   //to their image which should be Weakmap stored with a texture and used
   this.addTexture = (image) => {
-    //TODO: Temporary yucky thing
+    //TODO: We are temporarily using a single texture.  should change!
     loaded = true
     gl.bindTexture(gl.TEXTURE_2D, onlyTexture)
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image); 
+    return onlyTexture
   }
 
   this.resize = (width, height) => {
@@ -149,13 +150,20 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
       setBox(
         boxes, 
         freeIndex++, 
-        entities[i].physics.x, 
-        entities[i].physics.y, 
         entities[i].renderable.width,
-        entities[i].renderable.height
+        entities[i].renderable.height,
+        entities[i].physics.x, 
+        entities[i].physics.y
       )
       activeSprites++
     }
+  }
+
+  this.addSprite = (image, w, h, x, y, tw, th, tx, ty) => {
+    //TODO: temporary hard coded single sprite
+    if (!loaded) this.addTexture(image)
+    setBox(boxes, freeIndex++, w, h, x, y)
+    activeSprites++
   }
 
   this.flush = () => {
