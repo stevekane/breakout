@@ -1,6 +1,7 @@
 module.exports.Renderable       = Renderable
 module.exports.Physics          = Physics
 module.exports.PlayerControlled = PlayerControlled
+module.exports.Animated         = Animated
 
 function Renderable (e, image, width, height) {
   e.renderable = {
@@ -36,4 +37,14 @@ function Physics (e, width, height, x, y) {
 
 function PlayerControlled (e) {
   e.playerControlled = true
+}
+
+function Animated (e, defaultAnimationName, animHash) {
+  e.animated = {
+    animations:            animHash,
+    currentAnimationName:  defaultAnimationName,
+    currentAnimationIndex: 0,
+    currentAnimation:      animHash[defaultAnimationName],
+    timeTillNextFrame:     animHash[defaultAnimationName].frames[0].duration
+  } 
 }

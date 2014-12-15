@@ -1,12 +1,17 @@
-let {Paddle} = require("./assemblages")
-let PaddleMoverSystem = require("./PaddleMoverSystem")
-let RenderingSystem   = require("./RenderingSystem")
-let Scene             = require("./Scene")
+let {Paddle, Block} = require("./assemblages")
+let PaddleMoverSystem       = require("./PaddleMoverSystem")
+let RenderingSystem         = require("./RenderingSystem")
+let KeyframeAnimationSystem = require("./KeyframeAnimationSystem")
+let Scene                   = require("./Scene")
 
 module.exports = TestScene
 
 function TestScene () {
-  let systems = [new PaddleMoverSystem, new RenderingSystem]
+  let systems = [
+    new PaddleMoverSystem, 
+    new KeyframeAnimationSystem,
+    new RenderingSystem
+  ]
 
   Scene.call(this, "test", systems)
 }
@@ -18,7 +23,10 @@ TestScene.prototype.setup = function (cb) {
   let {bg} = audioSystem.channels
   let assets = {
     //sounds: { bgMusic: "/public/sounds/bgm1.mp3" },
-    textures: { paddle: "/public/spritesheets/paddle.png" }
+    textures: { 
+      paddle: "/public/spritesheets/paddle.png",
+      blocks: "/public/spritesheets/blocks.png"
+    }
   }
 
   loader.loadAssets(assets, function (err, loadedAssets) {
@@ -27,6 +35,7 @@ TestScene.prototype.setup = function (cb) {
     cache.sounds   = sounds
     cache.textures = textures
     entityStore.addEntity(new Paddle(textures.paddle, 112, 25, 400, 400))
+    entityStore.addEntity(new Block(textures.blocks, 44, 22, 800, 800))
     //bg.volume = 0
     //bg.loop(cache.sounds.bgMusic)
     cb(null)

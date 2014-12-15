@@ -14,14 +14,7 @@ PaddleMoverSystem.prototype.run = function (scene, entities) {
 
   //can happen during loading for example
   if (!paddle) return
-  //if (keyboardManager.isDowns[37]) paddle.physics.x -= clock.dT * moveSpeed
-  //if (keyboardManager.isDowns[39]) paddle.physics.x += clock.dT * moveSpeed
-  if (paddle.physics.x < 100)  {
-    paddle.physics.dx = 1
-  } else if (paddle.physics.x >= 800) {
-    paddle.physics.dx = -1
-  } else {
-    paddle.physics.dx = paddle.physics.dx || 1
-  }
-  paddle.physics.x += clock.dT * moveSpeed * paddle.physics.dx
+
+  if (keyboardManager.isDowns[37]) paddle.physics.x -= clock.dT * moveSpeed
+  if (keyboardManager.isDowns[39]) paddle.physics.x += clock.dT * moveSpeed
 }
