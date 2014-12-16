@@ -1,13 +1,15 @@
 let {spriteVertexShader, spriteFragmentShader} = require("./gl-shaders")
+let {polygonVertexShader, polygonFragmentShader} = require("./gl-shaders")
 let {Shader, Program, Texture} = require("./gl-types")
 let {updateBuffer} = require("./gl-buffer")
 
 module.exports = GLRenderer
 
-const POINT_DIMENSION  = 2
-const POINTS_PER_BOX   = 6
-const BOX_LENGTH       = POINT_DIMENSION * POINTS_PER_BOX
-const MAX_VERTEX_COUNT = 1000
+const POINT_DIMENSION     = 2
+const COLOR_CHANNEL_COUNT = 4
+const POINTS_PER_BOX      = 6
+const BOX_LENGTH          = POINT_DIMENSION * POINTS_PER_BOX
+const MAX_VERTEX_COUNT    = 1000
 
 function setBox (boxArray, index, w, h, x, y) {
   let i  = BOX_LENGTH * index
@@ -90,27 +92,35 @@ function GLRenderer (canvas, width, height) {
   let gl             = canvas.getContext("webgl")      
   let svs            = Shader(gl, gl.VERTEX_SHADER, spriteVertexShader)
   let sfs            = Shader(gl, gl.FRAGMENT_SHADER, spriteFragmentShader)
-  //let pvs            = Shader(gl, gl.VERTEX_SHADER, polygonVertexShader)
-  //let pfs            = Shader(gl, gl.FRAGMENT_SHADER, polygonFragmentShader)
+  let pvs            = Shader(gl, gl.VERTEX_SHADER, polygonVertexShader)
+  let pfs            = Shader(gl, gl.FRAGMENT_SHADER, polygonFragmentShader)
   let spriteProgram  = Program(gl, svs, sfs)
-  //let polygonProgram = Program(gl, pvs, pfs)
+  let polygonProgram = Program(gl, pvs, pfs)
 
-  //handles to GPU buffers
+  //Sprite shader buffers
   let boxBuffer      = gl.createBuffer()
   let centerBuffer   = gl.createBuffer()
   let scaleBuffer    = gl.createBuffer()
   let rotationBuffer = gl.createBuffer()
   let texCoordBuffer = gl.createBuffer()
 
+  //polygon shader buffers
+  let vertexBuffer      = gl.createBuffer()
+  let vertexColorBuffer = gl.createBuffer()
+
   //GPU buffer locations
   let boxLocation      = gl.getAttribLocation(spriteProgram, "a_position")
+  let texCoordLocation = gl.getAttribLocation(spriteProgram, "a_texCoord")
   //let centerLocation   = gl.getAttribLocation(program, "a_center")
   //let scaleLocation    = gl.getAttribLocation(program, "a_scale")
   //let rotLocation      = gl.getAttribLocation(program, "a_rotation")
-  let texCoordLocation = gl.getAttribLocation(spriteProgram, "a_texCoord")
+
+  let vertexLocation      = gl.getAttribLocation(polygonProgram, "a_vertex")
+  let vertexColorLocation = gl.getAttribLocation(polygonProgram, "a_vertexColor")
 
   //Uniform locations
-  let worldSizeLocation = gl.getUniformLocation(spriteProgram, "u_worldSize")
+  let worldSizeSpriteLocation  = gl.getUniformLocation(spriteProgram, "u_worldSize")
+  let worldSizePolygonLocation = gl.getUniformLocation(polygonProgram, "u_worldSize")
 
   let imageToTextureMap = new Map()
   let textureToBatchMap = new Map()
@@ -176,10 +186,18 @@ function GLRenderer (canvas, width, height) {
   let resetPolygons = (batch) => batch.index = 0
 
   let drawPolygons = (batch) => {
-    //use the correct program
-    //buffer the vertices
-    //buffer the vertexcolors
-    //draw the arrays
+    updateBuffer(gl, 
+      vertexBuffer, 
+      vertexLocation, 
+      POINT_DIMENSION, 
+      polygonBatch.vertices)
+    updateBuffer(
+      gl, 
+      vertexColorBuffer, 
+      vertexColorLocation, 
+      COLOR_CHANNEL_COUNT, 
+      polygonBatch.vertexColors)
+    gl.drawArrays(gl.TRIANGLES, 0, polygonBatch.index * POINTS_PER_BOX)
   }
 
   let resetBatch = (batch) => batch.count = 0
@@ -201,11 +219,16 @@ function GLRenderer (canvas, width, height) {
 
   this.render = () => {
     gl.clear(gl.COLOR_BUFFER_BIT)
+
+    //Spritesheet batch rendering
     gl.useProgram(spriteProgram)
     //TODO: hardcoded for the moment for testing
-    gl.uniform2f(worldSizeLocation, 1920, 1080)
+    gl.uniform2f(worldSizeSpriteLocation, 1920, 1080)
     textureToBatchMap.forEach(drawBatch)
-    //gl.useProgram(polygonProgram)
-    //drawPolygons(polygonBatch)
+
+    //polgon rendering
+    gl.useProgram(polygonProgram)
+    gl.uniform2f(worldSizePolygonLocation, 1920, 1080)
+    drawPolygons(polygonBatch)
   }
 }

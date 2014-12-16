@@ -8,7 +8,7 @@ function Shader (gl, type, src) {
 
   isValid = gl.getShaderParameter(shader, gl.COMPILE_STATUS)
 
-  if (!isValid) throw new Error("Not valid shader: \n" + src)
+  if (!isValid) throw new Error("Not valid shader: \n" + gl.getShaderInfoLog(shader))
   return        shader
 }
 
