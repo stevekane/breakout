@@ -26,10 +26,10 @@ RenderingSystem.prototype.run = function (scene, entities) {
         ent.physics.height,
         ent.physics.x,
         ent.physics.y,
-        frame.aabb.h,
-        frame.aabb.w,
-        frame.aabb.x,
-        frame.aabb.y
+        frame.aabb.w / ent.renderable.image.width,
+        frame.aabb.h / ent.renderable.image.height,
+        frame.aabb.x / ent.renderable.image.width,
+        frame.aabb.y / ent.renderable.image.height
       )
     } else {
       renderer.addSprite(

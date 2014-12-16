@@ -120,7 +120,7 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
   }
 
   this.addBatch = (texture) => {
-    textureToBatchMap.set(texture, new Batch)
+    textureToBatchMap.set(texture, new Batch(maxSpriteCount))
     return textureToBatchMap.get(texture)
   }
 
@@ -145,13 +145,12 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
     gl.viewport(0, 0, newWidth, newHeight)
   }
 
-  this.addSprite = (image, w, h, x, y, tw, th, tx, ty) => {
+  this.addSprite = (image, w, h, x, y, texw, texh, texx, texy) => {
     let tx    = imageToTextureMap.get(image) || this.addTexture(image)
     let batch = textureToBatchMap.get(tx) || this.addBatch(tx)
 
     setBox(batch.boxes, batch.count, w, h, x, y)
-    //setBox(batch.texCoords, batch.count, tw, th, tx, ty)
-    //TODO: We should set the texcoords for this sprite as well
+    setBox(batch.texCoords, batch.count, texw, texh, texx, texy)
     batch.count++
   }
 
