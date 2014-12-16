@@ -10,20 +10,17 @@ let InputManager    = require("./InputManager")
 let KeyboardManager = require("./KeyboardManager")
 let AudioSystem     = require("./AudioSystem")
 let canvas          = document.createElement("canvas")
-let vertexSrc       = document.getElementById("vertex").text
-let fragSrc         = document.getElementById("fragment").text
 
 const UPDATE_INTERVAL = 25
 const MAX_COUNT       = 1000
 
 let keyboardManager = new KeyboardManager(document)
 let inputManager    = new InputManager(keyboardManager)
-let rendererOpts    = { maxSpriteCount: MAX_COUNT }
 let entityStore     = new EntityStore
 let clock           = new Clock(Date.now)
 let cache           = new Cache(["sounds", "textures"])
 let loader          = new Loader
-let renderer        = new GLRenderer(canvas, vertexSrc, fragSrc, rendererOpts)
+let renderer        = new GLRenderer(canvas, 1920, 1080)
 let audioSystem     = new AudioSystem(["main", "bg"])
 let sceneManager    = new SceneManager([new TestScene])
 let game            = new Game(clock, cache, loader, inputManager,
