@@ -69,6 +69,15 @@ function TextureCoordinatesArray (count) {
   return ar
 }
 
+function Batch (size) {
+  this.count      = 0
+  this.boxes      = BoxArray(size)
+  this.centers    = CenterArray(size)
+  this.scales     = ScaleArray(size)
+  this.rotations  = RotationArray(size)
+  this.texCoords  = TextureCoordinatesArray(size)
+}
+
 function GLRenderer (canvas, vSrc, fSrc, options={}) {
   let {maxSpriteCount, width, height} = options
   let maxSpriteCount = maxSpriteCount || 100
@@ -111,14 +120,7 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
   }
 
   this.addBatch = (texture) => {
-    textureToBatchMap.set(texture, {
-      count:     0,
-      boxes:     BoxArray(maxSpriteCount),
-      centers:   CenterArray(maxSpriteCount),
-      scales:    ScaleArray(maxSpriteCount),
-      rotations: RotationArray(maxSpriteCount),
-      texCoords: TextureCoordinatesArray(maxSpriteCount)
-    }) 
+    textureToBatchMap.set(texture, new Batch)
     return textureToBatchMap.get(texture)
   }
 
@@ -148,6 +150,7 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
     let batch = textureToBatchMap.get(tx) || this.addBatch(tx)
 
     setBox(batch.boxes, batch.count, w, h, x, y)
+    //setBox(batch.texCoords, batch.count, tw, th, tx, ty)
     //TODO: We should set the texcoords for this sprite as well
     batch.count++
   }
@@ -165,9 +168,7 @@ function GLRenderer (canvas, vSrc, fSrc, options={}) {
     
   }
 
-  this.flush = () => {
-    textureToBatchMap.forEach(resetBatch)
-  }
+  this.flush = () => textureToBatchMap.forEach(resetBatch)
 
   this.render = () => {
     gl.clear(gl.COLOR_BUFFER_BIT)
