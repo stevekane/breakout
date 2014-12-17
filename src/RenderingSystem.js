@@ -1,3 +1,4 @@
+let {setBox} = require("./utils")
 let System = require("./System")
 
 module.exports = RenderingSystem
@@ -6,33 +7,63 @@ function RenderingSystem () {
   System.call(this, ["physics", "renderable"])
 }
 
-function Polygon (vertices, vertexColors) {
-  this.vertices     = vertices  
+//x0, y0, x1, y1, x2, y2...
+//let verts = new Float32Array([
+//  0, 800, 
+//  1920, 800, 
+//  0, 1080,
+//  1920, 800, 
+//  1920, 1080, 
+//  0, 1080
+//])
+//
+////r,g,b,a...
+//let vertColors = new Float32Array([
+//  0, 0, 0.5, .6, //light
+//  0, 0, 0.5, .6, //light
+//  0, 0, 1,   1,
+//  0, 0, 1,   1,
+//  0, 0, 0.5, .6, //light
+//  0, 0, 1,   1
+//])
+
+function Polygon (vertices, indices, vertexColors) {
+  this.vertices     = vertices
+  this.indices      = indices
   this.vertexColors = vertexColors
 }
 
-//x0, y0, x1, y1, x2, y2...
-let vertices = new Float32Array([
-  0, 800, 
-  1920, 800, 
-  0, 1080,
-  1920, 800, 
-  1920, 1080, 
-  0, 1080
-])
+function createWater (w, h, x, y, subDiv, colorTop, colorBottom) {
+  let vertices     = new Float32Array(subDiv * 6 * 2)
+  let vertexColors = new Float32Array(subDiv * 6 * 4)
+  let unitWidth    = w / subDiv
+  let i = -1
 
-//r,g,b,a...
-let vertexColors = new Float32Array([
-  0, 0, 0.5, .6, //light
-  0, 0, 0.5, .6, //light
-  0, 0, 1,   1,
-  0, 0, 0.5, .6, //light
+  while ( ++ i < subDiv ) {
+    setBox(vertices, i, unitWidth, h, unitWidth * i + x, y)
+    vertexColors.set(vertColors, i * vertColors.length)
+  }
+  return new Polygon(vertices, vertexColors)
+}
+
+let waterVerts = new Float32Array([
+  0,    800,
+  1920, 400,
+  0,    1080,
+  1920, 1080 
+])
+let waterIndices = new Uint32Array([
+  0, 1, 2,
+  2, 1, 3
+])
+let waterColors = new Float32Array([
+  0, 0, 0.5, .6,
+  0, 0, 0.5, .6,
   0, 0, 1,   1,
   0, 0, 1,   1
 ])
 
-//TODO: This is a hack to test polygon rendering
-let polygon = new Polygon(vertices, vertexColors)
+let water = new Polygon(waterVerts, waterIndices, waterColors)
 
 RenderingSystem.prototype.run = function (scene, entities) {
   let {renderer} = scene.game
@@ -44,7 +75,7 @@ RenderingSystem.prototype.run = function (scene, entities) {
   renderer.flush()
 
   //TODO: For testing of polygon rendering
-  renderer.addPolygon(polygon.vertices, polygon.vertexColors)
+  renderer.addPolygon(water.vertices, water.indices, water.vertexColors)
 
   while (++i < len) {
     ent = entities[i]

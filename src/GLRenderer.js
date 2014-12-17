@@ -1,5 +1,6 @@
 let {spriteVertexShader, spriteFragmentShader} = require("./gl-shaders")
 let {polygonVertexShader, polygonFragmentShader} = require("./gl-shaders")
+let {setBox} = require("./utils")
 let {Shader, Program, Texture} = require("./gl-types")
 let {updateBuffer} = require("./gl-buffer")
 
@@ -9,29 +10,7 @@ const POINT_DIMENSION     = 2
 const COLOR_CHANNEL_COUNT = 4
 const POINTS_PER_BOX      = 6
 const BOX_LENGTH          = POINT_DIMENSION * POINTS_PER_BOX
-const MAX_VERTEX_COUNT    = 1000
-
-function setBox (boxArray, index, w, h, x, y) {
-  let i  = BOX_LENGTH * index
-  let x1 = x
-  let y1 = y 
-  let x2 = x + w
-  let y2 = y + h
-
-  boxArray[i]    = x1
-  boxArray[i+1]  = y1
-  boxArray[i+2]  = x2
-  boxArray[i+3]  = y1
-  boxArray[i+4]  = x1
-  boxArray[i+5]  = y2
-
-  boxArray[i+6]  = x1
-  boxArray[i+7]  = y2
-  boxArray[i+8]  = x2
-  boxArray[i+9]  = y1
-  boxArray[i+10] = x2
-  boxArray[i+11] = y2
-}
+const MAX_VERTEX_COUNT    = 1000000
 
 function BoxArray (count) {
   return new Float32Array(count * BOX_LENGTH)
@@ -62,6 +41,10 @@ function TextureCoordinatesArray (count) {
   return ar
 }
 
+function IndexArray (size) {
+  return new Uint16Array(size)
+}
+
 function VertexArray (size) {
   return new Float32Array(size * POINT_DIMENSION)
 }
@@ -82,6 +65,7 @@ function SpriteBatch (size) {
 
 function PolygonBatch (size) {
   this.index        = 0
+  this.indices      = IndexArray(size)
   this.vertices     = VertexArray(size)
   this.vertexColors = VertexColorArray(size)
 }
@@ -107,6 +91,7 @@ function GLRenderer (canvas, width, height) {
   //polygon shader buffers
   let vertexBuffer      = gl.createBuffer()
   let vertexColorBuffer = gl.createBuffer()
+  let indexBuffer       = gl.createBuffer()
 
   //GPU buffer locations
   let boxLocation      = gl.getAttribLocation(spriteProgram, "a_position")
@@ -172,13 +157,11 @@ function GLRenderer (canvas, width, height) {
     batch.count++
   }
 
-  //vertices and vertexColors are arrays or typed arrays
-  //[x0, y0, x1, y1, ...]
-  //[r0, g0, b0, a0, ...]
-  this.addPolygon = (vertices, vertexColors) => {
-    let vertexCount = vertices.length / POINT_DIMENSION
+  this.addPolygon = (vertices, indices, vertexColors) => {
+    let vertexCount = indices.length
 
     polygonBatch.vertices.set(vertices, polygonBatch.index)
+    polygonBatch.indices.set(indices, polygonBatch.index)
     polygonBatch.vertexColors.set(vertexColors, polygonBatch.index)
     polygonBatch.index += vertexCount
   }
@@ -190,14 +173,16 @@ function GLRenderer (canvas, width, height) {
       vertexBuffer, 
       vertexLocation, 
       POINT_DIMENSION, 
-      polygonBatch.vertices)
+      batch.vertices)
     updateBuffer(
       gl, 
       vertexColorBuffer, 
       vertexColorLocation, 
       COLOR_CHANNEL_COUNT, 
-      polygonBatch.vertexColors)
-    gl.drawArrays(gl.TRIANGLES, 0, polygonBatch.index * POINTS_PER_BOX)
+      batch.vertexColors)
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, batch.indices, gl.DYNAMIC_DRAW)
+    gl.drawElements(gl.TRIANGLES, batch.index, gl.UNSIGNED_SHORT, 0)
   }
 
   let resetBatch = (batch) => batch.count = 0
@@ -228,6 +213,7 @@ function GLRenderer (canvas, width, height) {
 
     //polgon rendering
     gl.useProgram(polygonProgram)
+    //TODO: hardcoded for the moment for testing
     gl.uniform2f(worldSizePolygonLocation, 1920, 1080)
     drawPolygons(polygonBatch)
   }
