@@ -1,3 +1,5 @@
+let System = require("./System")
+
 module.exports = PolygonRenderingSystem
 
 function PolygonRenderingSystem () {
@@ -15,6 +17,6 @@ PolygonRenderingSystem.prototype.run = function (scene, entities) {
   while (++ i < len) {
     ent = entities[i] 
     //TODO: vertices should be in local coords.  Need to translate to global
-    renderer.addPolygon(ent.sprite.vertices, ent.sprite.indices, ent.sprite.vertexColors)
+    renderer.addPolygon(ent.polygon.vertices, ent.polygon.indices, ent.polygon.vertexColors)
   }
 }

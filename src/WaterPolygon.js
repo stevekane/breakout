@@ -1,12 +1,11 @@
 let Polygon = require("./Polygon")
 
-module.exports = Water
+module.exports = WaterPolygon
 
 const POINTS_PER_VERTEX   = 2
 const COLOR_CHANNEL_COUNT = 4
 const INDICES_PER_QUAD    = 6
 const QUAD_VERTEX_SIZE    = 8
-const QUAD_COLOR_SIZE     = 16
 
 function setVertex (vertices, index, x, y) {
   let i = index * POINTS_PER_VERTEX
@@ -21,7 +20,7 @@ function setColor (colors, index, color) {
   colors.set(color, i)
 }
 
-function createWater (w, h, x, y, sliceCount, topColor, bottomColor) {
+function WaterPolygon (w, h, x, y, sliceCount, topColor, bottomColor) {
   let vertexCount  = 2 + (sliceCount * 2)
   let vertices     = new Float32Array(vertexCount * POINTS_PER_VERTEX)
   let vertexColors = new Float32Array(vertexCount * COLOR_CHANNEL_COUNT)
@@ -47,7 +46,4 @@ function createWater (w, h, x, y, sliceCount, topColor, bottomColor) {
   }
 
   return new Polygon(vertices, indices, vertexColors)
-}
-function Water () {
-           
 }

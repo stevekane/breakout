@@ -1,4 +1,4 @@
-let {Paddle, Block, Fighter} = require("./assemblages")
+let {Paddle, Block, Fighter, Water} = require("./assemblages")
 let PaddleMoverSystem       = require("./PaddleMoverSystem")
 let SpriteRenderingSystem   = require("./SpriteRenderingSystem")
 let PolygonRenderingSystem  = require("./PolygonRenderingSystem")
@@ -40,6 +40,7 @@ TestScene.prototype.setup = function (cb) {
     entityStore.addEntity(new Paddle(textures.paddle, 112, 25, 400, 400))
     entityStore.addEntity(new Block(textures.blocks, 44, 22, 800, 800))
     entityStore.addEntity(new Fighter(textures.fighter, 76, 59, 500, 500))
+    entityStore.addEntity(new Water(1920, 280, 0, 800, 100))
     //bg.volume = 0
     //bg.loop(cache.sounds.bgMusic)
     cb(null)
