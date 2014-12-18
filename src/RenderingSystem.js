@@ -7,54 +7,72 @@ function RenderingSystem () {
   System.call(this, ["physics", "renderable"])
 }
 
-//x0, y0, x1, y1, x2, y2...
-//let verts = new Float32Array([
-//  0, 800, 
-//  1920, 800, 
-//  0, 1080,
-//  1920, 800, 
-//  1920, 1080, 
-//  0, 1080
-//])
-//
-////r,g,b,a...
-//let vertColors = new Float32Array([
-//  0, 0, 0.5, .6, //light
-//  0, 0, 0.5, .6, //light
-//  0, 0, 1,   1,
-//  0, 0, 1,   1,
-//  0, 0, 0.5, .6, //light
-//  0, 0, 1,   1
-//])
-
 function Polygon (vertices, indices, vertexColors) {
   this.vertices     = vertices
   this.indices      = indices
   this.vertexColors = vertexColors
 }
 
-function createWater (w, h, x, y, subDiv, colorTop, colorBottom) {
-  let vertices     = new Float32Array(subDiv * 6 * 2)
-  let vertexColors = new Float32Array(subDiv * 6 * 4)
-  let unitWidth    = w / subDiv
-  let i = -1
+const POINTS_PER_VERTEX   = 2
+const COLOR_CHANNEL_COUNT = 4
+const INDICES_PER_QUAD    = 6
+const QUAD_VERTEX_SIZE    = 8
+const QUAD_COLOR_SIZE     = 16
 
-  while ( ++ i < subDiv ) {
-    setBox(vertices, i, unitWidth, h, unitWidth * i + x, y)
-    vertexColors.set(vertColors, i * vertColors.length)
-  }
-  return new Polygon(vertices, vertexColors)
+function setVertex (vertices, index, x, y) {
+  let i = index * POINTS_PER_VERTEX
+
+  vertices[i]   = x
+  vertices[i+1] = y
 }
+
+function setColor (colors, index, color) {
+  let i = index * COLOR_CHANNEL_COUNT
+
+  colors.set(color, i)
+}
+
+//colors passed in as 4 length arrays [r, g, b, a]
+//(i, i + sliceCount + 1, i + 1), (i + sliceCount + 1, i + sliceCount + 2, i + 1)
+function createWater (w, h, x, y, sliceCount, topColor, bottomColor) {
+  let vertexCount  = 2 + (sliceCount * 2)
+  let vertices     = new Float32Array(vertexCount * POINTS_PER_VERTEX)
+  let vertexColors = new Float32Array(vertexCount * COLOR_CHANNEL_COUNT)
+  let indices      = new Uint16Array(INDICES_PER_QUAD * sliceCount)
+  let unitWidth    = w / sliceCount
+  let i            = -1
+  let j            = -1
+
+  while ( ++i <= sliceCount ) {
+    setVertex(vertices, i, (x + unitWidth * i), y)
+    setColor(vertexColors, i, topColor)
+    setVertex(vertices, i + sliceCount + 1, (x + unitWidth * i), y + h)
+    setColor(vertexColors, i + sliceCount + 1, bottomColor)
+  }
+
+  while ( ++ j < sliceCount ) {
+    indices[j*INDICES_PER_QUAD]   = j
+    indices[j*INDICES_PER_QUAD+1] = j + sliceCount + 1
+    indices[j*INDICES_PER_QUAD+2] = j + 1
+    indices[j*INDICES_PER_QUAD+3] = j + sliceCount + 1
+    indices[j*INDICES_PER_QUAD+4] = j + sliceCount + 2
+    indices[j*INDICES_PER_QUAD+5] = j + 1
+  }
+
+  return new Polygon(vertices, indices, vertexColors)
+}
+
+window.createWater = createWater
 
 let waterVerts = new Float32Array([
   0,    800,
-  1920, 400,
+  1920, 800,
   0,    1080,
   1920, 1080 
 ])
-let waterIndices = new Uint32Array([
-  0, 1, 2,
-  2, 1, 3
+let waterIndices = new Uint16Array([
+  0, 2, 1,
+  2, 3, 1 
 ])
 let waterColors = new Float32Array([
   0, 0, 0.5, .6,
@@ -63,7 +81,14 @@ let waterColors = new Float32Array([
   0, 0, 1,   1
 ])
 
-let water = new Polygon(waterVerts, waterIndices, waterColors)
+//let water = new Polygon(waterVerts, waterIndices, waterColors)
+let water = createWater(1920, 280, 0, 800, 100, [0,0,.5, .6], [0,0,1,1])
+
+for (var i = 0; i < 100; ++i) {
+  water.vertices[i*2 + 1] += (Math.sin(i) * 10)
+}
+
+window.water = water
 
 RenderingSystem.prototype.run = function (scene, entities) {
   let {renderer} = scene.game

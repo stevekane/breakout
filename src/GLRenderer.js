@@ -112,6 +112,7 @@ function GLRenderer (canvas, width, height) {
   let polygonBatch      = new PolygonBatch(MAX_VERTEX_COUNT)
 
   gl.enable(gl.BLEND)
+  gl.enable(gl.CULL_FACE)
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
   gl.clearColor(1.0, 1.0, 1.0, 0.0)
   gl.colorMask(true, true, true, true)
@@ -183,6 +184,7 @@ function GLRenderer (canvas, width, height) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, batch.indices, gl.DYNAMIC_DRAW)
     gl.drawElements(gl.TRIANGLES, batch.index, gl.UNSIGNED_SHORT, 0)
+    //gl.drawElements(gl.LINE_LOOP, batch.index, gl.UNSIGNED_SHORT, 0)
   }
 
   let resetBatch = (batch) => batch.count = 0

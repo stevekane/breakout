@@ -25,15 +25,15 @@ function setBox (boxArray, index, w, h, x, y) {
 
   boxArray[i]    = x1
   boxArray[i+1]  = y1
-  boxArray[i+2]  = x2
-  boxArray[i+3]  = y1
-  boxArray[i+4]  = x1
-  boxArray[i+5]  = y2
+  boxArray[i+2]  = x1
+  boxArray[i+3]  = y2
+  boxArray[i+4]  = x2
+  boxArray[i+5]  = y1
 
   boxArray[i+6]  = x1
   boxArray[i+7]  = y2
   boxArray[i+8]  = x2
-  boxArray[i+9]  = y1
+  boxArray[i+9]  = y2
   boxArray[i+10] = x2
-  boxArray[i+11] = y2
+  boxArray[i+11] = y1
 }
