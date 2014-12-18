@@ -184,7 +184,7 @@ function GLRenderer (canvas, width, height) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, batch.indices, gl.DYNAMIC_DRAW)
     gl.drawElements(gl.TRIANGLES, batch.index, gl.UNSIGNED_SHORT, 0)
-    //gl.drawElements(gl.LINE_LOOP, batch.index, gl.UNSIGNED_SHORT, 0)
+    //gl.drawElements(gl.LINES, batch.index, gl.UNSIGNED_SHORT, 0)
   }
 
   let resetBatch = (batch) => batch.count = 0

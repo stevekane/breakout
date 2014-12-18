@@ -1,24 +1,23 @@
-module.exports.Renderable       = Renderable
 module.exports.Physics          = Physics
 module.exports.PlayerControlled = PlayerControlled
-module.exports.Animated         = Animated
+module.exports.Sprite           = Sprite
+module.exports.Polygon          = Polygon
 
-function Renderable (e, image, width, height) {
-  e.renderable = {
-    image,
+function Sprite (e, width, height, image, currentAnimationName, animations) {
+  e.sprite = {
     width,
     height,
-    rotation: 0,
-    center: {
-      x: width / 2,
-      y: height / 2 
-    },
-    scale: {
-      x: 1,
-      y: 1 
-    }
-  } 
-  return e
+    image,
+    animations,
+    currentAnimationName,
+    currentAnimationIndex: 0,
+    currentAnimation:      animations[currentAnimationName],
+    timeTillNextFrame:     animations[currentAnimationName].frames[0].duration
+  }
+}
+
+function Polygon (e, polygon) {
+  e.polygon = polygon
 }
 
 function Physics (e, width, height, x, y) {
@@ -37,14 +36,4 @@ function Physics (e, width, height, x, y) {
 
 function PlayerControlled (e) {
   e.playerControlled = true
-}
-
-function Animated (e, defaultAnimationName, animHash) {
-  e.animated = {
-    animations:            animHash,
-    currentAnimationName:  defaultAnimationName,
-    currentAnimationIndex: 0,
-    currentAnimation:      animHash[defaultAnimationName],
-    timeTillNextFrame:     animHash[defaultAnimationName].frames[0].duration
-  } 
 }

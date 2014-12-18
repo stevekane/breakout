@@ -3,7 +3,7 @@ let System = require("./System")
 module.exports = KeyframeAnimationSystem
 
 function KeyframeAnimationSystem () {
-  System.call(this, ["renderable", "animated"])
+  System.call(this, ["sprite"])
 }
 
 KeyframeAnimationSystem.prototype.run = function (scene, entities) {
@@ -21,19 +21,19 @@ KeyframeAnimationSystem.prototype.run = function (scene, entities) {
 
   while (++i < len) {
     ent           = entities[i] 
-    currentIndex  = ent.animated.currentAnimationIndex
-    currentAnim   = ent.animated.currentAnimation
+    currentIndex  = ent.sprite.currentAnimationIndex
+    currentAnim   = ent.sprite.currentAnimation
     currentFrame  = currentAnim.frames[currentIndex]
     nextFrame     = currentAnim.frames[currentIndex + 1] || currentAnim.frames[0]
-    timeLeft      = ent.animated.timeTillNextFrame
+    timeLeft      = ent.sprite.timeTillNextFrame
     overshoot     = timeLeft - dT   
     shouldAdvance = overshoot <= 0
       
     if (shouldAdvance) {
-      ent.animated.currentAnimationIndex = currentAnim.frames.indexOf(nextFrame)
-      ent.animated.timeTillNextFrame     = nextFrame.duration + overshoot 
+      ent.sprite.currentAnimationIndex = currentAnim.frames.indexOf(nextFrame)
+      ent.sprite.timeTillNextFrame     = nextFrame.duration + overshoot 
     } else {
-      ent.animated.timeTillNextFrame = overshoot 
+      ent.sprite.timeTillNextFrame = overshoot 
     }
   }
 }

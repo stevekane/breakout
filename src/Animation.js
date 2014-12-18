@@ -28,3 +28,10 @@ Animation.createLinear = function (w, h, x, y, count, doesLoop, rate=42) {
 
   return new Animation(frames, doesLoop, rate)
 }
+
+Animation.createSingle = function (w, h, x, y, rate=43) {
+  let aabb   = new AABB(w, h, x, y)
+  let frames = [new Frame(aabb, rate)]
+
+  return new Animation(frames, true, rate)
+}
