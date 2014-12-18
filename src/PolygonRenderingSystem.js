@@ -10,7 +10,8 @@ PolygonRenderingSystem.prototype.run = function (scene, entities) {
   let i   = -1
   let ent
 
-  //add polygons to the renderer
+  renderer.flushPolygons()
+  
   while (++ i < len) {
     ent = entities[i] 
     //TODO: vertices should be in local coords.  Need to translate to global

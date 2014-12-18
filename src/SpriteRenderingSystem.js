@@ -1,21 +1,19 @@
 let System  = require("./System")
 
-module.exports = RenderingSystem
+module.exports = SpriteRenderingSystem
 
-function RenderingSystem () {
+function SpriteRenderingSystem () {
   System.call(this, ["physics", "sprite"])
 }
 
-RenderingSystem.prototype.run = function (scene, entities) {
+SpriteRenderingSystem.prototype.run = function (scene, entities) {
   let {renderer} = scene.game
   let len = entities.length
   let i   = -1
   let ent
   let frame
 
-  //TODO: Should be in the scene framework object
-  //should this only be sprite flush perhaps?
-  renderer.flush()
+  renderer.flushSprites()
 
   while (++i < len) {
     ent   = entities[i]

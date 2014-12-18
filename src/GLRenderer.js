@@ -184,7 +184,6 @@ function GLRenderer (canvas, width, height) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, batch.indices, gl.DYNAMIC_DRAW)
     gl.drawElements(gl.TRIANGLES, batch.index, gl.UNSIGNED_SHORT, 0)
-    //gl.drawElements(gl.LINES, batch.index, gl.UNSIGNED_SHORT, 0)
   }
 
   let resetBatch = (batch) => batch.count = 0
@@ -199,10 +198,9 @@ function GLRenderer (canvas, width, height) {
     gl.drawArrays(gl.TRIANGLES, 0, batch.count * POINTS_PER_BOX)
   }
 
-  this.flush = () => {
-    textureToBatchMap.forEach(resetBatch)
-    resetPolygons(polygonBatch)
-  }
+  this.flushSprites = () => textureToBatchMap.forEach(resetBatch)
+
+  this.flushPolygons = () => resetPolygons(polygonBatch)
 
   this.render = () => {
     gl.clear(gl.COLOR_BUFFER_BIT)

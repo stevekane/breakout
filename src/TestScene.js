@@ -1,6 +1,7 @@
 let {Paddle, Block, Fighter} = require("./assemblages")
 let PaddleMoverSystem       = require("./PaddleMoverSystem")
-let RenderingSystem         = require("./RenderingSystem")
+let SpriteRenderingSystem   = require("./SpriteRenderingSystem")
+let PolygonRenderingSystem  = require("./PolygonRenderingSystem")
 let KeyframeAnimationSystem = require("./KeyframeAnimationSystem")
 let Scene                   = require("./Scene")
 
@@ -10,7 +11,8 @@ function TestScene () {
   let systems = [
     new PaddleMoverSystem, 
     new KeyframeAnimationSystem,
-    new RenderingSystem
+    new PolygonRenderingSystem,
+    new SpriteRenderingSystem,
   ]
 
   Scene.call(this, "test", systems)
