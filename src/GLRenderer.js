@@ -114,7 +114,7 @@ function GLRenderer (canvas, width, height) {
   gl.enable(gl.BLEND)
   gl.enable(gl.CULL_FACE)
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-  gl.clearColor(1.0, 1.0, 1.0, 0.0)
+  gl.clearColor(0.0, 0.0, 0.0, 0.0)
   gl.colorMask(true, true, true, true)
   gl.activeTexture(gl.TEXTURE0)
 

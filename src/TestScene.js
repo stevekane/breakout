@@ -37,8 +37,16 @@ TestScene.prototype.setup = function (cb) {
 
     cache.sounds   = sounds
     cache.textures = textures
-    entityStore.addEntity(new Paddle(textures.paddle, 112, 25, 400, 400))
-    entityStore.addEntity(new Block(textures.blocks, 44, 22, 800, 800))
+
+    for (var i = 0; i < 20; ++i) {
+      entityStore.addEntity(new Block(textures.blocks, 90, 45, 60 + 90 * i, 100)) 
+      entityStore.addEntity(new Block(textures.blocks, 90, 45, 60 + 90 * i, 145)) 
+      entityStore.addEntity(new Block(textures.blocks, 90, 45, 60 + 90 * i, 190)) 
+      entityStore.addEntity(new Block(textures.blocks, 90, 45, 60 + 90 * i, 235)) 
+      entityStore.addEntity(new Block(textures.blocks, 90, 45, 60 + 90 * i, 280)) 
+    }
+
+    entityStore.addEntity(new Paddle(textures.paddle, 112, 25, 600, 600))
     entityStore.addEntity(new Fighter(textures.fighter, 76, 59, 500, 500))
     entityStore.addEntity(new Water(1920, 280, 0, 800, 100))
     //bg.volume = 0

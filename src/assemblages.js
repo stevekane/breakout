@@ -22,7 +22,7 @@ function Block (image, w, h, x, y) {
   Entity.call(this)
   Physics(this, w, h, x, y)
   Sprite(this, w, h, image, "idle", {
-    idle: Animation.createLinear(44, 22, 0, 0, 3, true, 500)
+    idle: Animation.createLinear(44, 22, 0, 0, 3, true, 1000)
   })
 }
 
