@@ -1,3 +1,4 @@
+let Camera          = require("./Camera")
 let Loader          = require("./Loader")
 let GLRenderer      = require("./GLRenderer")
 let EntityStore     = require("./EntityStore-Simple")
@@ -40,9 +41,17 @@ function makeUpdate (game) {
   }
 }
 
+let c = new Camera(1920, 1080, 0, 0)
+
+c.x = 60
+c.y = 100
+
+window.c = c
+console.log(c.matrix)
+
 function makeAnimate (game) {
   return function animate () {
-    game.renderer.render()
+    game.renderer.render(c.matrix)
     requestAnimationFrame(animate)  
   }
 }

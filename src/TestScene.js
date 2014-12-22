@@ -47,7 +47,7 @@ TestScene.prototype.setup = function (cb) {
     }
 
     entityStore.addEntity(new Paddle(textures.paddle, 112, 25, 600, 600))
-    entityStore.addEntity(new Fighter(textures.fighter, 76, 59, 500, 500))
+    //entityStore.addEntity(new Fighter(textures.fighter, 76, 59, 500, 500))
     entityStore.addEntity(new Water(1920, 280, 0, 800, 100))
     //bg.volume = 0
     //bg.loop(cache.sounds.bgMusic)

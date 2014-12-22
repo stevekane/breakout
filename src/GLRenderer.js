@@ -103,9 +103,14 @@ function GLRenderer (canvas, width, height) {
   let vertexLocation      = gl.getAttribLocation(polygonProgram, "a_vertex")
   let vertexColorLocation = gl.getAttribLocation(polygonProgram, "a_vertexColor")
 
-  //Uniform locations
+  //world size uniforms
   let worldSizeSpriteLocation  = gl.getUniformLocation(spriteProgram, "u_worldSize")
   let worldSizePolygonLocation = gl.getUniformLocation(polygonProgram, "u_worldSize")
+
+  //camera uniforms
+  let cameraTransformSpriteLocation = gl.getUniformLocation(spriteProgram, "u_cameraTransform")
+  //let cameraTransformPolygonLocation = gl.getUniformLocation(polygonProgram, "w_cameraTransform")
+
 
   let imageToTextureMap = new Map()
   let textureToBatchMap = new Map()
@@ -114,7 +119,7 @@ function GLRenderer (canvas, width, height) {
   gl.enable(gl.BLEND)
   gl.enable(gl.CULL_FACE)
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-  gl.clearColor(0.0, 0.0, 0.0, 0.0)
+  gl.clearColor(1.0, 1.0, 1.0, 1.0)
   gl.colorMask(true, true, true, true)
   gl.activeTexture(gl.TEXTURE0)
 
@@ -202,19 +207,20 @@ function GLRenderer (canvas, width, height) {
 
   this.flushPolygons = () => resetPolygons(polygonBatch)
 
-  this.render = () => {
+  this.render = (cameraTransform) => {
     gl.clear(gl.COLOR_BUFFER_BIT)
 
     //Spritesheet batch rendering
     gl.useProgram(spriteProgram)
     //TODO: hardcoded for the moment for testing
     gl.uniform2f(worldSizeSpriteLocation, 1920, 1080)
+    gl.uniformMatrix3fv(cameraTransformSpriteLocation, false, cameraTransform)
     textureToBatchMap.forEach(drawBatch)
 
     //polgon rendering
-    gl.useProgram(polygonProgram)
-    //TODO: hardcoded for the moment for testing
-    gl.uniform2f(worldSizePolygonLocation, 1920, 1080)
-    drawPolygons(polygonBatch)
+    //gl.useProgram(polygonProgram)
+    ////TODO: hardcoded for the moment for testing
+    //gl.uniform2f(worldSizePolygonLocation, 1920, 1080)
+    //drawPolygons(polygonBatch)
   }
 }
