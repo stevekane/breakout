@@ -109,7 +109,7 @@ function GLRenderer (canvas, width, height) {
 
   //camera uniforms
   let cameraTransformSpriteLocation = gl.getUniformLocation(spriteProgram, "u_cameraTransform")
-  //let cameraTransformPolygonLocation = gl.getUniformLocation(polygonProgram, "w_cameraTransform")
+  let cameraTransformPolygonLocation = gl.getUniformLocation(polygonProgram, "u_cameraTransform")
 
 
   let imageToTextureMap = new Map()
@@ -119,7 +119,7 @@ function GLRenderer (canvas, width, height) {
   gl.enable(gl.BLEND)
   gl.enable(gl.CULL_FACE)
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-  gl.clearColor(1.0, 1.0, 1.0, 1.0)
+  gl.clearColor(1.0, 1.0, 1.0, 0.0)
   gl.colorMask(true, true, true, true)
   gl.activeTexture(gl.TEXTURE0)
 
@@ -217,10 +217,11 @@ function GLRenderer (canvas, width, height) {
     gl.uniformMatrix3fv(cameraTransformSpriteLocation, false, cameraTransform)
     textureToBatchMap.forEach(drawBatch)
 
-    //polgon rendering
-    //gl.useProgram(polygonProgram)
-    ////TODO: hardcoded for the moment for testing
-    //gl.uniform2f(worldSizePolygonLocation, 1920, 1080)
-    //drawPolygons(polygonBatch)
+    //Polgon rendering
+    gl.useProgram(polygonProgram)
+    //TODO: hardcoded for the moment for testing
+    gl.uniform2f(worldSizePolygonLocation, 1920, 1080)
+    gl.uniformMatrix3fv(cameraTransformPolygonLocation, false, cameraTransform)
+    drawPolygons(polygonBatch)
   }
 }

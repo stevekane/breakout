@@ -3,10 +3,8 @@ module.exports.spriteVertexShader = " \
   \
   attribute vec2 a_position; \
   attribute vec2 a_texCoord; \
-  \
   uniform vec2 u_worldSize; \
   uniform mat3 u_cameraTransform; \
-  \
   varying vec2 v_texCoord; \
   \
   vec2 norm (vec2 position) { \
@@ -38,13 +36,15 @@ module.exports.polygonVertexShader = "\
   attribute vec2 a_vertex; \
   attribute vec4 a_vertexColor; \
   uniform vec2 u_worldSize; \
+  uniform mat3 u_cameraTransform; \
   varying vec4 v_vertexColor; \
   vec2 norm (vec2 position) { \
     return position * 2.0 - 1.0; \
   } \
   void main () { \
+    vec2 screenPos     = (u_cameraTransform * vec3(a_vertex, 1)).xy; \
     mat2 clipSpace     = mat2(1.0, 0.0, 0.0, -1.0); \
-    vec2 fromWorldSize = a_vertex / u_worldSize; \
+    vec2 fromWorldSize = screenPos / u_worldSize; \
     vec2 position      = clipSpace * norm(fromWorldSize); \
     \
     v_vertexColor = a_vertexColor; \
