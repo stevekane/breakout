@@ -21,6 +21,8 @@ function Paddle (image, w, h, x, y) {
 function Block (image, w, h, x, y) {
   Entity.call(this)
   Physics(this, w, h, x, y)
+  this.physics.dy = Math.random() * -2
+  this.physics.ddy = .001
   Sprite(this, w, h, image, "idle", {
     idle: Animation.createLinear(44, 22, 0, 0, 3, true, 1000)
   })

@@ -108,7 +108,7 @@ function GLRenderer (canvas, width, height) {
   let worldSizePolygonLocation = gl.getUniformLocation(polygonProgram, "u_worldSize")
 
   //camera uniforms
-  let cameraTransformSpriteLocation = gl.getUniformLocation(spriteProgram, "u_cameraTransform")
+  let cameraTransformSpriteLocation  = gl.getUniformLocation(spriteProgram, "u_cameraTransform")
   let cameraTransformPolygonLocation = gl.getUniformLocation(polygonProgram, "u_cameraTransform")
 
 
