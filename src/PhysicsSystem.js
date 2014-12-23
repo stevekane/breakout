@@ -1,27 +1,10 @@
+let {updateVelocity, updatePosition} = require("./physics/newtonion")
 let System = require("./System")
 
 module.exports = PhysicsSystem
 
 function PhysicsSystem () {
   System.call(this, ["physics"])
-}
-
-function updateVelocity (dT, entity) {
-  entity.physics.dx += (dT * entity.physics.ddx)
-  entity.physics.dy += (dT * entity.physics.ddy)
-}
-
-function updatePosition (dT, entity) {
-  entity.physics.x += (dT * entity.physics.dx)
-  entity.physics.y += (dT * entity.physics.dy)
-}
-
-function checkGround (maxY, ent) {
-  if (ent.physics.y >= maxY) {
-    ent.physics.ddy = 0 
-    ent.physics.dy  = 0 
-    ent.physics.y   = maxY
-  }
 }
 
 PhysicsSystem.prototype.run = function (scene, entities) {
@@ -32,8 +15,7 @@ PhysicsSystem.prototype.run = function (scene, entities) {
 
   while ( ++ i < len ) {
     ent = entities[i]
-    updateVelocity(dT, ent)
-    updatePosition(dT, ent)
-    checkGround(1045, ent)
+    updateVelocity(dT, ent.physics)
+    updatePosition(dT, ent.physics)
   }
 }

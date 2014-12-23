@@ -207,20 +207,18 @@ function GLRenderer (canvas, width, height) {
 
   this.flushPolygons = () => resetPolygons(polygonBatch)
 
-  this.render = (cameraTransform) => {
+  this.render = (worldWidth, worldHeight, cameraTransform) => {
     gl.clear(gl.COLOR_BUFFER_BIT)
 
     //Spritesheet batch rendering
     gl.useProgram(spriteProgram)
-    //TODO: hardcoded for the moment for testing
-    gl.uniform2f(worldSizeSpriteLocation, 1920, 1080)
+    gl.uniform2f(worldSizeSpriteLocation, worldWidth, worldHeight)
     gl.uniformMatrix3fv(cameraTransformSpriteLocation, false, cameraTransform)
     textureToBatchMap.forEach(drawBatch)
 
     //Polgon rendering
     gl.useProgram(polygonProgram)
-    //TODO: hardcoded for the moment for testing
-    gl.uniform2f(worldSizePolygonLocation, 1920, 1080)
+    gl.uniform2f(worldSizePolygonLocation, worldWidth, worldHeight)
     gl.uniformMatrix3fv(cameraTransformPolygonLocation, false, cameraTransform)
     drawPolygons(polygonBatch)
   }

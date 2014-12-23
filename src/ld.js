@@ -7,6 +7,7 @@ let Cache           = require("./Cache")
 let SceneManager    = require("./SceneManager")
 let TestScene       = require("./TestScene")
 let Game            = require("./Game")
+let World           = require("./World")
 let InputManager    = require("./InputManager")
 let KeyboardManager = require("./KeyboardManager")
 let AudioSystem     = require("./AudioSystem")
@@ -41,14 +42,12 @@ function makeUpdate (game) {
   }
 }
 
+let w = new World(1920, 1080)
 let c = new Camera(1920, 1080, 0, 0)
-
-window.c = c
-console.log(c.matrix)
 
 function makeAnimate (game) {
   return function animate () {
-    game.renderer.render(c.matrix)
+    game.renderer.render(w.width, w.height, c.matrix)
     requestAnimationFrame(animate)  
   }
 }
