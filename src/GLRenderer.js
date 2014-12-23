@@ -10,7 +10,7 @@ const POINT_DIMENSION     = 2
 const COLOR_CHANNEL_COUNT = 4
 const POINTS_PER_BOX      = 6
 const BOX_LENGTH          = POINT_DIMENSION * POINTS_PER_BOX
-const MAX_VERTEX_COUNT    = 1000000
+const MAX_VERTEX_COUNT    = 10000
 
 function BoxArray (count) {
   return new Float32Array(count * BOX_LENGTH)

@@ -840,7 +840,7 @@ var POINT_DIMENSION = 2;
 var COLOR_CHANNEL_COUNT = 4;
 var POINTS_PER_BOX = 6;
 var BOX_LENGTH = POINT_DIMENSION * POINTS_PER_BOX;
-var MAX_VERTEX_COUNT = 1000000;
+var MAX_VERTEX_COUNT = 65000;
 
 function BoxArray(count) {
   return new Float32Array(count * BOX_LENGTH);
